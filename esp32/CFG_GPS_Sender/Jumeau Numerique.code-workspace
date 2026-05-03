@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "../.."
+		},
+		{
+			"name": "CFG_GPS_Sender",
+			"path": "."
+		}
+	],
+	"settings": {}
+}

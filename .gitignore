@@ -1,0 +1,39 @@
+# ── Python ────────────────────────────────────────────────────────────────────
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# ── Environment / secrets — NEVER commit these ────────────────────────────────
+.env
+.env.local
+.env.*.local
+# Keep .env.example so teammates know which vars are needed
+!.env.example
+
+# ── Node / Frontend ───────────────────────────────────────────────────────────
+node_modules/
+dist/
+.cache/
+
+# ── PlatformIO build artifacts ────────────────────────────────────────────────
+esp32/CFG_GPS_Sender/.pio/
+esp32/CFG_GPS_Sender/.vscode/extensions.json
+
+# ── VS Code (keep c_cpp_properties for ESP32 IntelliSense) ───────────────────
+.vscode/settings.json
+.vscode/launch.json
+.vscode/tasks.json
+
+# ── Large 3D model files (too large for GitHub — store separately) ────────────
+pfe/public/models/*.glb
+pfe/public/models/*.blend
+pfe/public/models/*.fbx
+pfe/public/models/*.obj
+
+# ── OS ────────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
