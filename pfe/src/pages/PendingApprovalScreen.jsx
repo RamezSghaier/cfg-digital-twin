@@ -3,7 +3,7 @@ import { signOut } from 'firebase/auth'
 import { auth } from '../firebase/config'
 import { useAuth } from '../contexts/AuthContext'
 
-const API_BASE = 'http://localhost:8000/api'
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000/api'
 
 export default function PendingApprovalScreen() {
   const { refreshRole } = useAuth()

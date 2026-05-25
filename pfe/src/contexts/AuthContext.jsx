@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, useCallback } from 'rea
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from '../firebase/config'
 
-const API_BASE = 'http://localhost:8000/api'
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000/api'
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {

@@ -5,7 +5,7 @@ import { useTheme } from '../contexts/ThemeContext'
 import { SuspensionBanner, SuspensionPanel } from '../components/ui/SuspensionPanel'
 import * as THREE from 'three'
 
-const API_BASE = 'http://localhost:8000/api'
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000/api'
 
 /* ── Reusable glass card ── */
 function GCard({ children, style }) {
@@ -868,7 +868,7 @@ export default function HomePage() {
     let cancelled = false
     async function poll() {
       try {
-        const res = await fetch('http://localhost:8000/api/weather/scene')
+        const res = await fetch(`${API_BASE}/weather/scene`)
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
         const data = await res.json()
         if (!cancelled) {

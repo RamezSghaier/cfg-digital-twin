@@ -7,7 +7,7 @@ import SilkParticles from '../components/three/SilkParticles'
 import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 
-const API_BASE = 'http://localhost:8000/api'
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000/api'
 
 /* ── Static data for train / bibloc (no API equivalent) ── */
 const STATIC = {
