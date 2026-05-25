@@ -1,7 +1,7 @@
 """
 MongoDB connection via motor (async driver).
 Exposes a `db` object used by services and routes.
-On startup, seeds empty collections with realistic mock data.
+On startup, seeds empty collections with real SNCFT curve data.
 """
 import asyncio
 from datetime import datetime, timedelta
@@ -170,18 +170,18 @@ SEED_JOURNAL = [
 
 
 async def seed_if_empty():
-    """
-    Upsert segments so new fields (rail wear data) are added to existing
-    documents without wiping the collection. Journal is only seeded once.
-    """
-    # Segments — always upsert so enriched fields reach existing documents
-    for seg in SEED_SEGMENTS:
-        await db.courbures.update_one(
-            {"segment": seg["segment"]},
-            {"$set": seg},
-            upsert=True,
-        )
-    print(f"[DB] Upserted {len(SEED_SEGMENTS)} segments in 'courbures'.")
+    """Seed collections only when they are empty (first run)."""
+
+    # Real SNCFT curve data — insert once, index for query performance
+    if await db.courbures.count_documents({}) == 0:
+        from data.courbes_seed import COURBES_DATA
+        await db.courbures.insert_many(COURBES_DATA)
+        await db.courbures.create_index("segment_id", unique=True)
+        await db.courbures.create_index("ligne")
+        await db.courbures.create_index("statut")
+        await db.courbures.create_index("niveau_risque")
+        await db.courbures.create_index("rayon_m")
+        print(f"[DB] Seeded {len(COURBES_DATA)} real SNCFT curves into 'courbures'.")
 
     # Journal — only on first run
     if await db.journal.count_documents({}) == 0:

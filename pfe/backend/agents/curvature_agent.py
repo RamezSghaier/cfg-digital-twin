@@ -1,10 +1,12 @@
 """
-Curvature Agent — reads rail segment data from MongoDB, identifies
-critical segments, asks the LLM to generate professional alert messages,
-and stores new alerts in the alerts collection.
+Curvature Agent — queries real SNCFT curve data from MongoDB,
+identifies critical curves, and generates professional French alerts.
 
-Criticality thresholds are calibrated from a real UIC 54 kg rail
-inspection report (Nouaceur/El Jadida line, Morocco) and adapted for CFG.
+Risk thresholds (from SNCFT inspection report, Gafsa region):
+  rayon >= 1000 m → FAIBLE
+  rayon  500–999 → MOYEN
+  rayon  300–499 → ELEVE   (ALERTE)
+  rayon  < 300   → CRITIQUE (ALERTE)
 """
 import json
 from datetime import datetime
@@ -12,48 +14,49 @@ from datetime import datetime
 from openai import OpenAI
 
 from config import settings
-from services.mongodb_service import get_all_segments, save_alert
-from services.rail_risk import calculate_rail_risk_score
+from services.mongodb_service import save_alert
 
 client = OpenAI(api_key=settings.groq_api_key, base_url="https://api.groq.com/openai/v1")
 
-SYSTEM_PROMPT = """You are a railway infrastructure analyst for CFG (Chemin de Fer de Gafsa). Analyze the rail segment data and generate professional alert messages for the administrator.
+SYSTEM_PROMPT = """Tu es un analyste infrastructure ferroviaire pour la SNCFT (Société Nationale des Chemins de Fer Tunisiens), région de Gafsa.
 
-Each segment includes curvature data AND rail wear data (vertical wear in mm, cumulative tonnage, grinding interval, detected defects). Use ALL available data in your analysis.
+Tu reçois une liste de courbes ferroviaires critiques avec leurs rayons réels issus des rapports d'inspection.
 
-Key thresholds (UIC 54 kg rail, calibrated from real inspection data):
-- Vertical wear: LOW < 5 mm | MEDIUM 5–10 mm | HIGH 10–13 mm | CRITICAL > 13 mm
-- Cumulative tonnage: surveillance > 600 MT | critical > 750 MT | limit 800 MT
-- Grinding interval: recommended max 4 years
-- Critical defects: fissure_transversale, rupture_rail → immediate stop
-- High defects: head_checking, ecaillage → immediate grinding
+Seuils de risque (réseau Gafsa, rail UIC 54 kg) :
+- rayon >= 1000 m → FAIBLE  (nominal)
+- rayon  500–999 m → MOYEN  (surveillance)
+- rayon  300–499 m → ELEVE  (alerte, limitation de vitesse requise)
+- rayon  < 300 m  → CRITIQUE (arrêt ou vitesse < 30 km/h)
+- rayon minimum absolu réseau : 180 m
 
-For each critical segment, assess:
-- Risk level (LOW / MEDIUM / HIGH / CRITICAL)
-- Recommended action
-- Urgency level
+Pour chaque courbe critique, évalue :
+- Niveau de risque réel basé sur le rayon
+- Action recommandée (limitation vitesse / inspection / travaux)
+- Urgence
 
-Respond ONLY with valid JSON, no markdown, no preamble:
+Réponds UNIQUEMENT en JSON valide, sans markdown :
 {
   "critical_segments": [
     {
-      "segment": "B-01",
-      "name": "Redeyef — M'dhilla",
-      "risk_level": "CRITICAL",
-      "curvature": 5.8,
-      "tonnage": 67,
-      "usure_verticale_mm": 9,
-      "message": "French alert message mentioning specific wear values",
-      "action": "recommended action",
+      "segment": "L16-MET-016",
+      "name": "Tabeddit – Redeyef (193+720–194+190)",
+      "risk_level": "CRITIQUE",
+      "rayon_m": 180,
+      "ligne": "16",
+      "nom_ligne": "Tabeddit – Redeyef",
+      "pk_debut": "193+720",
+      "pk_fin": "194+190",
+      "message": "Courbe critique R=180m détectée sur la ligne 16 (Tabeddit–Redeyef) entre PK 193+720 et 194+190. Rayon inférieur au minimum absolu UIC recommandé de 250m pour ce type de trafic.",
+      "action": "Limitation de vitesse immédiate à 20 km/h. Inspection géométrique urgente.",
       "urgency": "IMMEDIATE"
     }
   ],
-  "overall_infrastructure_health": 73,
-  "summary": "French summary for admin"
+  "overall_infrastructure_health": 68,
+  "summary": "Résumé en français pour l'administrateur"
 }
 
-overall_infrastructure_health is an integer 0-100 (higher = healthier).
-urgency must be one of: IMMEDIATE, HIGH, NORMAL."""
+overall_infrastructure_health : entier 0–100 (100 = parfait état).
+urgency : IMMEDIATE | HIGH | NORMAL."""
 
 FALLBACK_RESULT = {
     "critical_segments": [],
@@ -62,78 +65,115 @@ FALLBACK_RESULT = {
 }
 
 
-def _is_critical(segment: dict) -> bool:
-    """
-    A segment is critical if any infrastructure or rail-wear threshold
-    is exceeded. Thresholds from UIC 54 kg inspection report.
-    """
-    defauts = segment.get("defauts_detectes", [])
-    rail_score = calculate_rail_risk_score(segment)
+# ── Helpers ────────────────────────────────────────────────────────────────────
 
+def _is_critical(curve: dict) -> bool:
     return (
-        segment.get("etat") == "ALERTE"
-        or segment.get("degres_par_km", 0) > 4.0
-        or segment.get("tonnage_estime", 0) > 60
-        or segment.get("usure_verticale_mm", 0) >= 10          # HIGH wear
-        or segment.get("tonnage_cumule_t", 0) >= 600_000_000   # surveillance zone
-        or segment.get("years_since_meulage", 0) >= 4          # grinding overdue
-        or "fissure_transversale" in defauts
-        or "head_checking" in defauts
-        or rail_score["level"] in ("HIGH", "CRITICAL")
+        curve.get("statut") == "ALERTE"
+        or curve.get("niveau_risque") in ("ELEVE", "CRITIQUE")
+        or curve.get("rayon_m", 9999) < 500
+        # Legacy field support
+        or curve.get("etat") == "ALERTE"
+        or curve.get("rayon_courbure", 9999) < 500
     )
 
+
+async def _get_curves_by_query(db, query: dict, limit: int = 200) -> list[dict]:
+    """Flexible query helper used by routes and the orchestrator."""
+    from services.mongodb_service import serialize_doc
+    cursor = db.courbures.find(query).sort("rayon_m", 1).limit(limit)
+    docs = await cursor.to_list(length=limit)
+    return [serialize_doc(d) for d in docs]
+
+
+async def get_statistics(db) -> dict:
+    """Per-line statistics: count, avg radius, % critical curves."""
+    from services.mongodb_service import serialize_doc
+    pipeline = [
+        {"$group": {
+            "_id": {"ligne": "$ligne", "nom_ligne": "$nom_ligne"},
+            "total":       {"$sum": 1},
+            "rayon_moyen": {"$avg": "$rayon_m"},
+            "nb_alerte":   {"$sum": {"$cond": [{"$eq": ["$statut", "ALERTE"]}, 1, 0]}},
+            "nb_critique": {"$sum": {"$cond": [{"$eq": ["$niveau_risque", "CRITIQUE"]}, 1, 0]}},
+            "rayon_min":   {"$min": "$rayon_m"},
+        }},
+        {"$sort": {"_id.ligne": 1}},
+    ]
+    cursor = db.courbures.aggregate(pipeline)
+    rows = await cursor.to_list(length=20)
+    return [
+        {
+            "ligne":       r["_id"]["ligne"],
+            "nom_ligne":   r["_id"]["nom_ligne"],
+            "total":       r["total"],
+            "rayon_moyen": round(r["rayon_moyen"]),
+            "nb_alerte":   r["nb_alerte"],
+            "nb_critique": r["nb_critique"],
+            "rayon_min":   r["rayon_min"],
+            "pct_critique": round(r["nb_critique"] / r["total"] * 100, 1),
+        }
+        for r in rows
+    ]
+
+
+# ── Main entry point ───────────────────────────────────────────────────────────
 
 async def run_curvature_agent(db) -> dict:
     """
-    Fetch segments, identify critical ones, generate Claude alerts,
-    and persist new alerts to MongoDB.
+    Fetch ALERTE/CRITIQUE curves, send to LLM for French alert generation,
+    persist new alerts to MongoDB.
     """
-    print("[CURVATURE AGENT] Fetching rail segments from MongoDB")
+    print("[CURVATURE AGENT] Querying SNCFT curve database…")
 
-    segments = await get_all_segments(db)
-    if not segments:
-        print("[CURVATURE AGENT] No segments found in database.")
-        return FALLBACK_RESULT
+    from services.mongodb_service import serialize_doc
 
-    critical_segments = [s for s in segments if _is_critical(s)]
-    print(
-        f"[CURVATURE AGENT] Found {len(critical_segments)} critical "
-        f"segment(s) out of {len(segments)} total."
-    )
+    # All curves with rayon < 500 m (ELEVE or CRITIQUE)
+    cursor = db.courbures.find({"rayon_m": {"$lt": 500}}).sort("rayon_m", 1).limit(50)
+    all_curves = await cursor.to_list(length=50)
+    all_curves = [serialize_doc(d) for d in all_curves]
 
-    if not critical_segments:
+    # Top 5 most dangerous (lowest rayon)
+    top5 = sorted(all_curves, key=lambda c: c.get("rayon_m", 9999))[:5]
+
+    if not all_curves:
         return {
             "critical_segments": [],
             "overall_infrastructure_health": 95,
-            "summary": "Tous les segments sont dans un état nominal. Aucune alerte infrastructure.",
+            "summary": "Toutes les courbes sont dans un état nominal. Aucune alerte infrastructure.",
         }
 
-    # Attach pre-computed rail risk score to each segment so the LLM has
-    # structured context without needing to recalculate thresholds itself
-    enriched = []
-    for s in segments:
-        entry = dict(s)
-        entry["rail_risk"] = calculate_rail_risk_score(s)
-        enriched.append(entry)
+    # Statistics per line for context
+    stats = await get_statistics(db)
 
-    user_content = (
-        f"Segments data (with pre-computed rail_risk scores): "
-        f"{json.dumps(enriched, ensure_ascii=False, default=str)}"
+    nb_critique = sum(1 for c in all_curves if c.get("niveau_risque") == "CRITIQUE")
+    nb_eleve    = sum(1 for c in all_curves if c.get("niveau_risque") == "ELEVE")
+
+    print(
+        f"[CURVATURE AGENT] {len(all_curves)} courbes critiques "
+        f"({nb_critique} CRITIQUE, {nb_eleve} ELEVE)"
     )
+
+    user_content = json.dumps({
+        "courbes_critiques": all_curves,
+        "top5_dangereuses":  top5,
+        "statistiques_par_ligne": stats,
+    }, ensure_ascii=False, default=str)
 
     for attempt in range(2):
         try:
             response = client.chat.completions.create(
                 model="llama-3.3-70b-versatile",
-                max_tokens=1024,
-                messages=[{"role": "system", "content": SYSTEM_PROMPT},
-                          {"role": "user", "content": user_content}],
+                max_tokens=1500,
+                messages=[
+                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "user",   "content": user_content},
+                ],
             )
-            raw = response.choices[0].message.content.strip()
+            raw    = response.choices[0].message.content.strip()
             result = json.loads(raw)
 
-            # Persist each critical segment alert only if no unacknowledged
-            # alert for that segment already exists (prevents duplicates)
+            # Persist alerts, skip duplicates
             for seg_alert in result.get("critical_segments", []):
                 existing = await db.alerts.find_one(
                     {"segment": seg_alert.get("segment"), "acknowledged": False}
@@ -141,27 +181,22 @@ async def run_curvature_agent(db) -> dict:
                 if not existing:
                     await save_alert(db, seg_alert)
                     print(
-                        f"[CURVATURE AGENT] Alert saved for segment "
+                        f"[CURVATURE AGENT] Alerte enregistrée : "
                         f"{seg_alert.get('segment')} — {seg_alert.get('risk_level')}"
-                    )
-                else:
-                    print(
-                        f"[CURVATURE AGENT] Alert already exists for segment "
-                        f"{seg_alert.get('segment')} — skipping insert"
                     )
 
             print(
-                f"[CURVATURE AGENT] Infrastructure health: "
+                f"[CURVATURE AGENT] Santé infrastructure : "
                 f"{result.get('overall_infrastructure_health')}%"
             )
             return result
 
         except json.JSONDecodeError as e:
-            print(f"[CURVATURE AGENT] JSON parse error (attempt {attempt + 1}): {e}")
+            print(f"[CURVATURE AGENT] JSON parse error (tentative {attempt + 1}): {e}")
             if attempt == 1:
                 return FALLBACK_RESULT
         except Exception as e:
-            print(f"[CURVATURE AGENT] Error: {e}")
+            print(f"[CURVATURE AGENT] Erreur : {e}")
             return FALLBACK_RESULT
 
     return FALLBACK_RESULT

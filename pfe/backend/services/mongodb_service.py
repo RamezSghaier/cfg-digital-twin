@@ -100,6 +100,38 @@ async def get_all_segments(db) -> List[dict]:
     return [_serialize(d) for d in docs]
 
 
+async def update_segment(db, segment_id: str, fields: dict) -> Optional[dict]:
+    result = await db.courbures.find_one_and_update(
+        {"segment_id": segment_id},
+        {"$set": {**fields, "updated_at": datetime.utcnow()}},
+        return_document=True,
+    )
+    return _serialize(result)
+
+
+async def delete_segment(db, segment_id: str) -> bool:
+    result = await db.courbures.delete_one({"segment_id": segment_id})
+    return result.deleted_count > 0
+
+
+# ─── Risk predictions ────────────────────────────────────────────────────────
+
+async def save_prediction(db, date: str, prediction: dict):
+    """Upsert a prediction by date — overwrite if regenerated."""
+    await db.predictions.update_one(
+        {"date": date},
+        {"$set": {**prediction, "saved_at": datetime.utcnow()}},
+        upsert=True,
+    )
+
+
+async def get_future_predictions(db, from_date: str) -> List[dict]:
+    """Return all stored predictions for dates >= from_date, sorted ascending."""
+    cursor = db.predictions.find({"date": {"$gte": from_date}}).sort("date", 1)
+    docs = await cursor.to_list(length=60)
+    return [_serialize(d) for d in docs]
+
+
 # ─── Chat journal (conversation log) ─────────────────────────────────────────
 
 async def log_conversation(db, user_message: str, ai_response: dict, user_role: str):

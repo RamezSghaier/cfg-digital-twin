@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Sidebar from '../components/layout/Sidebar'
+import { useTheme } from '../contexts/ThemeContext'
 
 const Accueil  = lazy(() => import('./HomePage'))
 const IA       = lazy(() => import('./IA'))
@@ -9,6 +10,7 @@ const APropos  = lazy(() => import('./APropos'))
 const Inspect  = lazy(() => import('./InspectPage'))
 
 function PageLoader() {
+  const { isDark } = useTheme()
   return (
     <div style={{
       height: '100vh',
@@ -16,7 +18,8 @@ function PageLoader() {
       alignItems: 'center',
       justifyContent: 'center',
       fontFamily: 'monospace',
-      color: 'rgba(112,193,255,0.3)',
+      color: isDark ? 'rgba(112,193,255,0.3)' : '#94a3b8',
+      background: isDark ? 'transparent' : '#f1f5f9',
       fontSize: '0.7rem',
       letterSpacing: '0.3em',
     }}>

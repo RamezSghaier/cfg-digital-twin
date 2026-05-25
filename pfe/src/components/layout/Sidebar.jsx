@@ -1,8 +1,9 @@
 import { NavLink } from 'react-router-dom'
 import { signOut } from 'firebase/auth'
 import { auth } from '../../firebase/config'
+import { useTheme } from '../../contexts/ThemeContext'
 
-/* ─── Icons ────────────────────────────────────────────────── */
+/* ─── Icons ────────────────────────────────────────────── */
 const IconHome = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <rect x="3" y="3" width="7" height="7" rx="1.5" />
@@ -35,10 +36,22 @@ const IconInfo = () => (
     <line x1="12" y1="12" x2="12" y2="17"   />
   </svg>
 )
-const IconSettings = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="3" />
-    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+const IconSun = () => (
+  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="5"/>
+    <line x1="12" y1="1" x2="12" y2="3"/>
+    <line x1="12" y1="21" x2="12" y2="23"/>
+    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+    <line x1="1" y1="12" x2="3" y2="12"/>
+    <line x1="21" y1="12" x2="23" y2="12"/>
+    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+  </svg>
+)
+const IconMoon = () => (
+  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
   </svg>
 )
 const IconLogout = () => (
@@ -57,8 +70,16 @@ const NAV_ITEMS = [
   { to: '/apropos', icon: <IconInfo />,    label: 'À propos', end: false },
 ]
 
-/* ─── Icon button ───────────────────────────────────────────── */
+/* ─── Nav button ────────────────────────────────────────────── */
 function NavBtn({ to, icon, label, end }) {
+  const { isDark } = useTheme()
+  const activeColor   = isDark ? '#2ba1fb'  : '#6366f1'
+  const inactiveColor = isDark ? 'rgba(113,157,168,0.8)' : '#94a3b8'
+  const hoverColor    = isDark ? 'rgba(255,255,255,0.8)'  : '#374151'
+  const activeShadow  = isDark
+    ? '0 0 14px rgba(39,245,234,0.8)'
+    : '0 0 14px rgba(99,102,241,0.3)'
+
   return (
     <NavLink
       to={to}
@@ -71,22 +92,18 @@ function NavBtn({ to, icon, label, end }) {
         width: 40,
         height: 40,
         borderRadius: '50%',
-        background: isActive ? '#2ba1fb' : 'transparent',
-        color: isActive ? '#fff' : 'rgba(113, 157, 168, 0.8)',
+        background: isActive ? activeColor : 'transparent',
+        color: isActive ? '#fff' : inactiveColor,
         textDecoration: 'none',
         transition: 'all 0.18s ease',
         flexShrink: 0,
-        boxShadow: isActive ? '0 0 14px rgba(39, 245, 234, 0.8)' : 'none',
+        boxShadow: isActive ? activeShadow : 'none',
       })}
       onMouseEnter={e => {
-        if (!e.currentTarget.style.background.includes('rgb(255, 107')) {
-          e.currentTarget.style.color = 'rgba(255,255,255,0.8)'
-        }
+        if (!e.currentTarget.getAttribute('aria-current')) e.currentTarget.style.color = hoverColor
       }}
       onMouseLeave={e => {
-        if (!e.currentTarget.style.background.includes('rgb(255, 107')) {
-          e.currentTarget.style.color = 'rgba(255,255,255,0.4)'
-        }
+        if (!e.currentTarget.getAttribute('aria-current')) e.currentTarget.style.color = inactiveColor
       }}
     >
       {icon}
@@ -94,7 +111,13 @@ function NavBtn({ to, icon, label, end }) {
   )
 }
 
+/* ─── Sidebar ───────────────────────────────────────────────── */
 export default function Sidebar() {
+  const { isDark, toggleTheme } = useTheme()
+
+  const iconColor      = isDark ? 'rgba(255,255,255,0.4)' : '#94a3b8'
+  const iconHoverColor = isDark ? 'rgba(255,255,255,0.85)' : '#374151'
+
   async function handleLogout() {
     await signOut(auth)
   }
@@ -112,36 +135,42 @@ export default function Sidebar() {
         alignItems: 'center',
         gap: 8,
         padding: '12px 8px',
-        background: 'rgba(30, 30, 30, 0.82)',
+        background: isDark ? 'rgba(30,30,30,0.82)' : 'rgba(255,255,255,0.95)',
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
         borderRadius: 999,
-        border: '1px solid rgba(255,255,255,0.1)',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.45)',
+        border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.08)',
+        boxShadow: isDark ? '0 8px 32px rgba(0,0,0,0.45)' : '0 8px 32px rgba(0,0,0,0.12)',
+        transition: 'background 0.25s, border-color 0.25s, box-shadow 0.25s',
       }}
     >
-      {/* Navigation icons */}
       {NAV_ITEMS.map(item => (
         <NavBtn key={item.to} {...item} />
       ))}
 
-      {/* Divider */}
-      <div style={{ width: 24, height: 1, background: 'rgba(255,255,255,0.1)', margin: '4px 0' }} />
+      <div style={{ width: 24, height: 1, background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)', margin: '4px 0' }} />
 
-      {/* Settings */}
+      {/* Theme toggle */}
       <button
-        title="Paramètres"
+        onClick={toggleTheme}
+        title={isDark ? 'Passer en mode clair' : 'Passer en mode sombre'}
         style={{
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           width: 40, height: 40, borderRadius: '50%',
           background: 'transparent', border: 'none',
-          color: 'rgba(255,255,255,0.4)',
-          cursor: 'pointer', transition: 'color 0.18s',
+          color: isDark ? 'rgba(255,193,7,0.6)' : 'rgba(99,102,241,0.6)',
+          cursor: 'pointer', transition: 'color 0.18s, background 0.18s',
         }}
-        onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.8)'}
-        onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
+        onMouseEnter={e => {
+          e.currentTarget.style.color = isDark ? '#fbbf24' : '#6366f1'
+          e.currentTarget.style.background = isDark ? 'rgba(251,191,36,0.1)' : 'rgba(99,102,241,0.1)'
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.color = isDark ? 'rgba(255,193,7,0.6)' : 'rgba(99,102,241,0.6)'
+          e.currentTarget.style.background = 'transparent'
+        }}
       >
-        <IconSettings />
+        {isDark ? <IconSun /> : <IconMoon />}
       </button>
 
       {/* Logout */}
@@ -152,15 +181,15 @@ export default function Sidebar() {
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           width: 40, height: 40, borderRadius: '50%',
           background: 'transparent', border: 'none',
-          color: 'rgba(255,255,255,0.4)',
-          cursor: 'pointer', transition: 'color 0.18s',
+          color: iconColor,
+          cursor: 'pointer', transition: 'color 0.18s, background 0.18s',
         }}
         onMouseEnter={e => {
           e.currentTarget.style.color = '#F87171'
           e.currentTarget.style.background = 'rgba(248,113,113,0.1)'
         }}
         onMouseLeave={e => {
-          e.currentTarget.style.color = 'rgba(255,255,255,0.4)'
+          e.currentTarget.style.color = iconColor
           e.currentTarget.style.background = 'transparent'
         }}
       >

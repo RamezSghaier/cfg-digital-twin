@@ -1,12 +1,16 @@
 import { BrowserRouter } from 'react-router-dom'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { ThemeProvider } from './contexts/ThemeContext'
 import Landing from './pages/Landing'
 import Dashboard from './pages/Dashboard'
+import RoleSetupScreen from './pages/RoleSetupScreen'
+import PendingApprovalScreen from './pages/PendingApprovalScreen'
 
 function AppRouter() {
-  const { user } = useAuth()
+  const { user, role, needsRoleSetup, roleLoading } = useAuth()
 
-  if (user === undefined) return (
+  // Still loading auth state or resolving role from backend
+  if (user === undefined || roleLoading) return (
     <div style={{
       position: 'fixed', inset: 0,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -17,16 +21,28 @@ function AppRouter() {
       CHARGEMENT…
     </div>
   )
-  if (user) return <Dashboard />
-  return <Landing />
+
+  // Not logged in
+  if (!user) return <Landing />
+
+  // Logged in but needs to pick a role (new user with no MongoDB profile)
+  if (needsRoleSetup) return <RoleSetupScreen />
+
+  // Logged in, role chosen, waiting for admin approval
+  if (role === 'pending_admin') return <PendingApprovalScreen />
+
+  // Normal access
+  return <Dashboard />
 }
 
 export default function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <AppRouter />
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <AppRouter />
+        </AuthProvider>
+      </ThemeProvider>
     </BrowserRouter>
   )
 }

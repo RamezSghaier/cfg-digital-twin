@@ -6,7 +6,7 @@
  *   <SuspensionPanel user={user} onSuspensionChange={fetchSuspension} />
  *   <SuspensionBanner suspension={suspension} />
  */
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const API_BASE = 'http://localhost:8000/api'
 
@@ -21,6 +21,8 @@ const glass = {
 }
 
 /* ── Banner shown to ALL users when a suspension is active ─────────────────── */
+const DOT_STYLE = `@keyframes dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)} }`
+
 export function SuspensionBanner({ suspension }) {
   if (!suspension) return null
 
@@ -30,6 +32,8 @@ export function SuspensionBanner({ suspension }) {
   })
 
   return (
+    <>
+    <style>{DOT_STYLE}</style>
     <div style={{
       position: 'fixed', top: 0, left: '88px', right: 0, zIndex: 300,
       padding: '10px 20px',
@@ -51,6 +55,7 @@ export function SuspensionBanner({ suspension }) {
         Jusqu'au {end}
       </div>
     </div>
+    </>
   )
 }
 
@@ -59,6 +64,7 @@ export function SuspensionPanel({ user, suspension, onSuspensionChange }) {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [segments, setSegments] = useState([])
 
   const [form, setForm] = useState({
     segment_id: 'ALL',
@@ -66,6 +72,16 @@ export function SuspensionPanel({ user, suspension, onSuspensionChange }) {
     message: '',
     end_date: '',
   })
+
+  useEffect(() => {
+    if (!open || !user) return
+    user.getIdToken().then(token =>
+      fetch(`${API_BASE}/segments`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.ok ? r.json() : null)
+        .then(d => { if (d?.segments) setSegments(d.segments) })
+        .catch(() => {})
+    )
+  }, [open, user])
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
@@ -113,6 +129,7 @@ export function SuspensionPanel({ user, suspension, onSuspensionChange }) {
       })
       if (!res.ok) throw new Error('Erreur lors de l\'annulation.')
       onSuspensionChange()
+      setOpen(false)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -217,11 +234,11 @@ export function SuspensionPanel({ user, suspension, onSuspensionChange }) {
                     style={inputStyle}
                   >
                     <option value="ALL">Toute la ligne</option>
-                    <option value="A-01">A-01 — Gafsa — Moularès</option>
-                    <option value="A-02">A-02 — Moularès — Redeyef</option>
-                    <option value="B-01">B-01 — Redeyef — M'dhilla</option>
-                    <option value="B-02">B-02 — M'dhilla — Metlaoui</option>
-                    <option value="C-01">C-01 — Metlaoui — Om Larayes</option>
+                    {segments.map(s => (
+                      <option key={s.segment_id} value={s.segment_id}>
+                        {s.segment_id}{s.nom_ligne ? ` — ${s.nom_ligne}` : s.gare_proche ? ` — ${s.gare_proche}` : ''}
+                      </option>
+                    ))}
                   </select>
                 </div>
 

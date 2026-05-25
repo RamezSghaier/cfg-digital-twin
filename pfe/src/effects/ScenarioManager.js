@@ -9,15 +9,6 @@ const SPARKS_STOP_AT  = -40.0 * DEG   // kill sparks when X reaches this
 // Target Y offsets per emitter once movement starts
 const SPARKS_Y_TARGETS = [-9.5, -10, -10]
 
-const SCENARIOS = [
-  { type: 'normal',         icon: '✅', label: 'Normal'              },
-  { type: 'heatload',       icon: '🌡️', label: 'Canicule\n+Surcharge' },
-  { type: 'rainbrake',      icon: '🌧️', label: 'Pluie\n+Freinage'    },
-  { type: 'sandwear',       icon: '🌪️', label: 'Sable\n+Usure'       },
-  { type: 'derail_partial', icon: '⚠️', label: 'Déraillement\nPartiel'},
-  { type: 'derail_full',    icon: '💥', label: 'Déraillement\nTotal'  },
-]
-
 const ALERT_DEFS = {
   normal: null,
 
@@ -48,6 +39,24 @@ const ALERT_DEFS = {
     border:  'rgba(220,38,38,0.55)',
   },
 
+  fogbrake: {
+    icon:    '🌫️',
+    title:   'BROUILLARD DENSE — VISIBILITÉ RÉDUITE',
+    message: 'Visibilité inférieure à 50 m — distance de freinage critique. Réduction de vitesse obligatoire.',
+    color:   '#94a3b8',
+    bg:      'rgba(148,163,184,0.12)',
+    border:  'rgba(148,163,184,0.45)',
+  },
+
+  curve: {
+    icon:    '📐',
+    title:   'COURBURE CRITIQUE DÉTECTÉE',
+    message: 'Rayon de courbure sous le seuil minimal (300 m) — risque de déraillement à vitesse normale. Ralentissement imposé.',
+    color:   '#a855f7',
+    bg:      'rgba(168,85,247,0.12)',
+    border:  'rgba(168,85,247,0.45)',
+  },
+
   derail_partial: {
     icon:    '⚠️',
     title:   'DÉRAILLEMENT PARTIEL',
@@ -67,15 +76,6 @@ const ALERT_DEFS = {
   },
 }
 
-const SCENARIO_COLOR = {
-  normal:         '100,180,255',
-  heatload:       '249,115,22',
-  rainbrake:      '239,68,68',
-  sandwear:       '220,38,38',
-  derail_partial: '251,146,60',
-  derail_full:    '255,32,32',
-}
-
 function lerp(a, b, t) { return a + (b - a) * t }
 
 export class ScenarioManager {
@@ -84,7 +84,6 @@ export class ScenarioManager {
     this.trainAnim       = trainAnim
     this._scene          = weatherManager.ctx.scene
     this.currentScenario = 'normal'
-    this._btnMap         = {}
     this._sparksStates   = [null, null, null]
 
     this.sparksOffsets = [
@@ -104,14 +103,12 @@ export class ScenarioManager {
     this._savedSparksY    = null   // saved emitter Y values for full-derail restore
 
     this._buildAlert()
-    this._buildUI()
   }
 
   setScenario(type) {
     if (type === this.currentScenario) return
     this.currentScenario = type
     this._apply(type)
-    this._updateButtons(type)
   }
 
   update(delta, _elapsed) {
@@ -176,7 +173,6 @@ export class ScenarioManager {
   dispose() {
     this._resetDerail()
     this._stopSparks()
-    if (this._panel?.parentNode)   this._panel.parentNode.removeChild(this._panel)
     if (this._alertEl?.parentNode) this._alertEl.parentNode.removeChild(this._alertEl)
   }
 
@@ -216,6 +212,20 @@ export class ScenarioManager {
         trainAnim?.setSpeed(0.012)
         trainAnim?.setPlaying(true)
         this._showAlert(ALERT_DEFS.sandwear)
+        break
+
+      case 'fogbrake':
+        weatherManager.setWeather('fog')
+        trainAnim?.setSpeed(0.010)
+        trainAnim?.setPlaying(true)
+        this._showAlert(ALERT_DEFS.fogbrake)
+        break
+
+      case 'curve':
+        weatherManager.setWeather('clear')
+        trainAnim?.setSpeed(0.015)
+        trainAnim?.setPlaying(true)
+        this._showAlert(ALERT_DEFS.curve)
         break
 
       case 'derail_partial':
@@ -344,85 +354,4 @@ export class ScenarioManager {
     this._alertEl.style.transform = 'translateX(-50%) translateY(-200%)'
   }
 
-  // ── Control panel ────────────────────────────────────────────────────────
-  _buildUI() {
-    const panel = document.createElement('div')
-    panel.style.cssText = [
-      'position:fixed', 'bottom:160px', 'left:50%', 'transform:translateX(-50%)',
-      'background:rgba(0,0,0,0.45)',
-      'backdrop-filter:blur(12px)', '-webkit-backdrop-filter:blur(12px)',
-      'border:1px solid rgba(255,255,255,0.15)', 'border-radius:16px',
-      'padding:14px 22px', 'display:flex', 'flex-direction:column',
-      'align-items:center', 'gap:10px', 'z-index:1000',
-      'pointer-events:all', 'user-select:none',
-      'font-family:system-ui,sans-serif',
-    ].join(';')
-
-    const title = document.createElement('div')
-    title.textContent = '⚡ Scénarios Combinés'
-    title.style.cssText = [
-      'color:#fff', 'font-size:0.78rem', 'font-weight:600',
-      'letter-spacing:0.1em', 'opacity:0.85',
-    ].join(';')
-    panel.appendChild(title)
-
-    const row = document.createElement('div')
-    row.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;justify-content:center'
-
-    for (const { type, icon, label } of SCENARIOS) {
-      const btn = document.createElement('button')
-      btn.style.cssText = [
-        'display:flex', 'flex-direction:column', 'align-items:center', 'gap:3px',
-        'padding:8px 14px', 'background:rgba(255,255,255,0.07)',
-        'border:1px solid rgba(255,255,255,0.12)', 'border-radius:10px',
-        'color:#ddd', 'font-size:0.68rem', 'cursor:pointer',
-        'transition:all 0.18s ease', 'min-width:76px',
-        'white-space:pre-line', 'text-align:center', 'line-height:1.35',
-      ].join(';')
-
-      const iconEl = document.createElement('span')
-      iconEl.textContent = icon
-      iconEl.style.fontSize = '1.35rem'
-
-      const lblEl = document.createElement('span')
-      lblEl.textContent = label
-
-      btn.appendChild(iconEl)
-      btn.appendChild(lblEl)
-
-      btn.addEventListener('mouseenter', () => {
-        if (type !== this.currentScenario) btn.style.background = 'rgba(255,255,255,0.14)'
-      })
-      btn.addEventListener('mouseleave', () => {
-        if (type !== this.currentScenario) btn.style.background = 'rgba(255,255,255,0.07)'
-      })
-      btn.addEventListener('click', () => this.setScenario(type))
-
-      this._btnMap[type] = btn
-      row.appendChild(btn)
-    }
-
-    panel.appendChild(row)
-    document.body.appendChild(panel)
-    this._panel = panel
-
-    this._updateButtons('normal')
-  }
-
-  _updateButtons(activeType) {
-    for (const [type, btn] of Object.entries(this._btnMap)) {
-      if (type === activeType) {
-        const c = SCENARIO_COLOR[type] ?? '100,180,255'
-        btn.style.background = `rgba(${c},0.22)`
-        btn.style.border     = `1px solid rgba(${c},0.72)`
-        btn.style.color      = '#fff'
-        btn.style.boxShadow  = `0 0 12px rgba(${c},0.45)`
-      } else {
-        btn.style.background = 'rgba(255,255,255,0.07)'
-        btn.style.border     = '1px solid rgba(255,255,255,0.12)'
-        btn.style.color      = '#ddd'
-        btn.style.boxShadow  = 'none'
-      }
-    }
-  }
 }

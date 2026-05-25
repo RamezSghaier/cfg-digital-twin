@@ -1,12 +1,67 @@
-/* ─── Glass card ─────────────────────────────────────────────── */
-function GlassCard({ children, style }) {
+import { useRef, useEffect, useState } from 'react'
+import { useTheme } from '../contexts/ThemeContext'
+
+const FEATURES = [
+  { icon: '🧊', title: 'Simulation 3D',       desc: 'Train interactif temps réel avec contrôles caméra et inspection des rails', color: '#6366f1' },
+  { icon: '🤖', title: 'Agent IA',             desc: 'Analyse en langage naturel, identification et déclenchement de scénarios', color: '#06b6d4' },
+  { icon: '🌤️', title: 'Météo intégrée',       desc: 'Données en direct avec effets visuels adaptatifs dans la scène 3D',       color: '#f59e0b' },
+  { icon: '⚠️', title: 'Scénarios de risque',  desc: 'Déraillement, usure rails, brouillard, inondation, panne freins…',        color: '#ef4444' },
+  { icon: '📅', title: 'Journal & Calendrier', desc: 'Historique des sessions, prédictions IA et rejeu des simulations',         color: '#10b981' },
+  { icon: '🔐', title: 'Accès par rôle',        desc: 'Admin (alertes, CRUD courbures) vs Utilisateur (simulation et IA)',       color: '#8b5cf6' },
+]
+
+const TECH = [
+  { cat: '3D',     tech: 'Three.js',        color: '#f97316', desc: 'Rendu temps réel, contrôles caméra, effets visuels' },
+  { cat: 'Front',  tech: 'React + Vite',    color: '#06b6d4', desc: 'SPA, routing, gestion d\'état réactif' },
+  { cat: 'Back',   tech: 'FastAPI',         color: '#10b981', desc: 'API REST, agents IA, traitement données' },
+  { cat: 'BDD',    tech: 'MongoDB',         color: '#4ade80', desc: 'Courbures, sessions, journaux, prédictions' },
+  { cat: 'Auth',   tech: 'Firebase',        color: '#fbbf24', desc: 'Connexion sécurisée, rôles admin / user' },
+  { cat: 'Météo',  tech: 'Open-Meteo',      color: '#38bdf8', desc: 'Historique et prévisions météo gratuites' },
+  { cat: 'AI',     tech: 'Groq / Llama 3',  color: '#a78bfa', desc: 'Inférence rapide, analyse de risques' },
+]
+
+const TEAM = [
+  { role: 'Développeur',    name: 'Ramez Sghaier',        detail: 'Génie Informatique — ENIS Sfax', color: '#6366f1', init: 'RS' },
+  { role: 'Encadrant',      name: 'Encadrant académique', detail: 'École Nationale d\'Ingénieurs de Sfax', color: '#06b6d4', init: 'EA' },
+  { role: 'Co-encadrant',   name: 'Responsable CFG',      detail: 'Chemin de Fer de Gafsa',              color: '#10b981', init: 'RC' },
+]
+
+const STATS = [
+  { val: '7',    label: 'Scénarios',  color: '#6366f1' },
+  { val: '5',    label: 'Segments',   color: '#06b6d4' },
+  { val: '2',    label: 'Rôles',      color: '#10b981' },
+  { val: '100%', label: 'Open-source',color: '#f59e0b' },
+]
+
+/* ── Scroll-reveal hook ─────────────────────────────────────── */
+function useReveal(threshold = 0.12) {
+  const ref = useRef(null)
+  const [visible, setVisible] = useState(false)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const obs = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) { setVisible(true); obs.disconnect() } },
+      { threshold }
+    )
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [threshold])
+  return { ref, visible }
+}
+
+/* ── Reveal wrapper ─────────────────────────────────────────── */
+function Reveal({ children, delay = 0, direction = 'up', style = {} }) {
+  const { ref, visible } = useReveal()
+  const translate = direction === 'up' ? 'translateY(32px)'
+                  : direction === 'down' ? 'translateY(-24px)'
+                  : direction === 'left' ? 'translateX(32px)'
+                  : 'scale(0.94)'
   return (
-    <div style={{
-      background: 'rgba(5, 12, 25, 0.65)',
-      backdropFilter: 'blur(20px)',
-      WebkitBackdropFilter: 'blur(20px)',
-      border: '1px solid rgba(112, 193, 255, 0.12)',
-      borderRadius: '16px',
+    <div ref={ref} style={{
+      opacity: visible ? 1 : 0,
+      transform: visible ? 'none' : translate,
+      transition: `opacity 0.65s ease ${delay}s, transform 0.65s cubic-bezier(0.22,1,0.36,1) ${delay}s`,
       ...style,
     }}>
       {children}
@@ -14,165 +69,199 @@ function GlassCard({ children, style }) {
   )
 }
 
-/* ─── Section label ──────────────────────────────────────────── */
-function SectionLabel({ children }) {
+/* ── Section title ──────────────────────────────────────────── */
+function SectionTitle({ children, isDark, faint }) {
   return (
-    <div style={{
-      fontSize: '0.58rem',
-      letterSpacing: '0.4em',
-      opacity: 0.35,
-      marginBottom: '14px',
-      fontFamily: 'monospace',
-      color: '#70c1ff',
-    }}>
-      {children}
-    </div>
+    <Reveal>
+      <div style={{ marginBottom: 20, display: 'flex', alignItems: 'center', gap: 14 }}>
+        <h2 style={{ fontSize: '1rem', fontWeight: 700, color: isDark ? '#e8f4ff' : '#0f172a', margin: 0, letterSpacing: isDark ? '0.08em' : '0', whiteSpace: 'nowrap' }}>
+          {children}
+        </h2>
+        <div style={{ flex: 1, height: 1, background: `linear-gradient(90deg, ${faint}, transparent)` }} />
+      </div>
+    </Reveal>
   )
 }
 
-/* ─── Tech stack data ────────────────────────────────────────── */
-const TECH_STACK = [
-  { category: 'Simulation 3D',  tech: 'Three.js',          role: 'Rendu temps réel, contrôles caméra, effets visuels' },
-  { category: 'Interface',      tech: 'React + Vite',       role: 'SPA, routing, gestion d\'état des composants' },
-  { category: 'Backend',        tech: 'Python + FastAPI',   role: 'API REST, agent IA, traitement des données' },
-  { category: 'Base de données',tech: 'MongoDB',            role: 'Stockage courbures, sessions, journaux' },
-  { category: 'Authentification',tech: 'Firebase Auth',     role: 'Connexion sécurisée, rôles admin / utilisateur' },
-  { category: 'Météo',          tech: 'API externe',        role: 'Conditions en temps réel, effets visuels adaptatifs' },
-  { category: 'Déploiement',    tech: 'Docker',             role: 'Conteneurisation backend + services' },
-]
-
-/* ─── Team data ──────────────────────────────────────────────── */
-const TEAM = [
-  { role: 'DÉVELOPPEUR',    name: 'Étudiant PFE',         detail: 'Génie Informatique — ENIS Sfax' },
-  { role: 'ENCADRANT',      name: 'Encadrant académique', detail: 'École Nationale d\'Ingénieurs de Sfax' },
-  { role: 'CO-ENCADRANT',   name: 'Responsable CFG',      detail: 'Chemin de Fer de Gafsa' },
-]
-
 export default function APropos() {
+  const { isDark } = useTheme()
+
+  const bg      = isDark ? '#02060f' : '#f8fafc'
+  const card    = isDark ? 'rgba(5,12,28,0.8)'  : '#ffffff'
+  const border  = isDark ? 'rgba(112,193,255,0.1)' : '#e2e8f0'
+  const shadow  = isDark ? 'none' : '0 2px 12px rgba(0,0,0,0.07)'
+  const text    = isDark ? '#e8f4ff' : '#0f172a'
+  const muted   = isDark ? 'rgba(200,220,255,0.55)' : '#475569'
+  const faint   = isDark ? 'rgba(112,193,255,0.3)'  : '#94a3b8'
+  const divider = isDark ? 'rgba(112,193,255,0.07)' : '#e2e8f0'
+  const font    = isDark ? 'monospace' : 'system-ui, -apple-system, sans-serif'
+  const heroBg  = isDark
+    ? 'radial-gradient(ellipse at 30% 0%, rgba(99,102,241,0.15) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(6,182,212,0.1) 0%, transparent 50%), #02060f'
+    : 'linear-gradient(135deg, #f0f4ff 0%, #f8fafc 50%, #f0fdf4 100%)'
+
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'radial-gradient(ellipse at 60% 60%, rgba(112,193,255,0.04) 0%, transparent 55%), #000',
-      padding: '32px 48px 48px 116px',
-      fontFamily: 'monospace',
-      color: '#70c1ff',
-      overflowY: 'auto',
-    }}>
+    <div style={{ minHeight: '100vh', background: bg, fontFamily: font, color: text, overflowY: 'auto', transition: 'background 0.3s' }}>
 
-      {/* ── Hero header ── */}
-      <div style={{ marginBottom: '40px' }}>
-        <div style={{ fontSize: '0.58rem', letterSpacing: '0.45em', opacity: 0.35, marginBottom: '10px' }}>
-          PROJET DE FIN D'ÉTUDES — 2025 / 2026
-        </div>
-        <h1 style={{
-          fontSize: 'clamp(1.4rem, 3vw, 2.2rem)',
-          letterSpacing: '0.25em',
-          fontWeight: 500,
-          textShadow: '0 0 30px rgba(112,193,255,0.45)',
-          margin: '0 0 8px 0',
-        }}>
-          CFG DIGITAL TWIN
-        </h1>
-        <div style={{ fontSize: '0.78rem', opacity: 0.45, letterSpacing: '0.12em', maxWidth: '560px', lineHeight: '1.8' }}>
-          Jumeau Numérique Ferroviaire — Plateforme intelligente de surveillance
-          et de prédiction des risques pour Chemin de Fer de Gafsa
-        </div>
+      {/* ── Hero ─────────────────────────────────────────────── */}
+      <div style={{ background: heroBg, borderBottom: `1px solid ${divider}`, position: 'relative', overflow: 'hidden' }}>
+        {isDark && <div style={{ position: 'absolute', top: -60, right: 80, width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(rgba(99,102,241,0.12),transparent 70%)', pointerEvents: 'none' }} />}
 
-        {/* Divider */}
-        <div style={{
-          marginTop: '24px',
-          width: '120px',
-          height: '1px',
-          background: 'linear-gradient(to right, #70c1ff44, transparent)',
-        }} />
-      </div>
+        <div style={{ maxWidth: 960, margin: '0 auto', padding: '52px 40px 44px 40px', marginLeft: 'max(80px, calc(50% - 480px + 80px))' }}>
 
-      {/* ── Contexte ── */}
-      <GlassCard style={{ padding: '24px 28px', marginBottom: '24px', maxWidth: '800px' }}>
-        <SectionLabel>CONTEXTE DU PROJET</SectionLabel>
-        <p style={{ fontSize: '0.82rem', lineHeight: '2', opacity: 0.75, margin: 0 }}>
-          La machine de mesure physique de Chemin de Fer de Gafsa, dont la réparation représente
-          plusieurs millions de dinars, est hors service. Ce jumeau numérique constitue une alternative
-          intelligente et économique : il simule l'infrastructure ferroviaire en temps réel dans un
-          environnement 3D interactif, intègre des données météorologiques en direct, et s'appuie
-          sur un agent IA pour détecter et anticiper les situations dangereuses avant qu'elles
-          ne se produisent sur le terrain.
-        </p>
-      </GlassCard>
-
-      {/* ── Fonctionnalités ── */}
-      <GlassCard style={{ padding: '24px 28px', marginBottom: '24px', maxWidth: '800px' }}>
-        <SectionLabel>FONCTIONNALITÉS CLÉS</SectionLabel>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '14px' }}>
-          {[
-            ['Simulation 3D',         'Train interactif temps réel avec contrôles caméra et inspection des rails'],
-            ['Agent IA',              'Réponses en langage naturel, identification et déclenchement de scénarios'],
-            ['Météo intégrée',        'Données météo en direct avec effets visuels adaptatifs dans la scène 3D'],
-            ['Scénarios de risque',   'Déraillement, usure rails, brouillard, inondation, panne freins'],
-            ['Journal & Calendrier',  'Historique des sessions et rejeu des simulations passées'],
-            ['Accès par rôle',        'Admin (alertes courbure, CRUD) / Utilisateur (simulation et IA)'],
-          ].map(([title, desc]) => (
-            <div key={title} style={{ padding: '14px', background: 'rgba(112,193,255,0.04)', borderRadius: '10px', border: '1px solid rgba(112,193,255,0.08)' }}>
-              <div style={{ fontSize: '0.68rem', letterSpacing: '0.1em', marginBottom: '6px' }}>{title}</div>
-              <div style={{ fontSize: '0.65rem', opacity: 0.45, lineHeight: '1.7' }}>{desc}</div>
+          <Reveal direction="down">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+              <span style={{ fontSize: '0.6rem', letterSpacing: '0.4em', color: faint, fontFamily: 'monospace' }}>PROJET DE FIN D'ÉTUDES — 2025/2026</span>
+              <span style={{ padding: '2px 10px', borderRadius: 20, fontSize: '0.6rem', fontWeight: 600, background: isDark ? 'rgba(99,102,241,0.15)' : '#eef2ff', color: isDark ? '#a5b4fc' : '#6366f1', border: isDark ? '1px solid rgba(99,102,241,0.3)' : '1px solid #c7d2fe' }}>PFE</span>
             </div>
-          ))}
-        </div>
-      </GlassCard>
 
-      {/* ── Stack technique ── */}
-      <GlassCard style={{ padding: '24px 28px', marginBottom: '24px', maxWidth: '800px' }}>
-        <SectionLabel>STACK TECHNIQUE</SectionLabel>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
-          {TECH_STACK.map(({ category, tech, role }, i) => (
-            <div key={tech} style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '16px',
-              padding: '12px 0',
-              borderBottom: i < TECH_STACK.length - 1 ? '1px solid rgba(112,193,255,0.07)' : 'none',
-              fontSize: '0.75rem',
+            <h1 style={{
+              fontSize: 'clamp(2rem, 5vw, 3.2rem)',
+              fontWeight: 800,
+              letterSpacing: isDark ? '0.1em' : '-0.02em',
+              margin: '0 0 12px',
+              background: isDark
+                ? 'linear-gradient(135deg, #e8f4ff 0%, #70c1ff 50%, #a5b4fc 100%)'
+                : 'linear-gradient(135deg, #1e293b 0%, #6366f1 60%, #06b6d4 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
             }}>
-              <div style={{ width: '130px', flexShrink: 0, opacity: 0.4, fontSize: '0.62rem', letterSpacing: '0.08em' }}>
-                {category}
-              </div>
-              <div style={{ width: '140px', flexShrink: 0, letterSpacing: '0.06em' }}>
-                {tech}
-              </div>
-              <div style={{ opacity: 0.4, fontSize: '0.68rem', lineHeight: '1.5' }}>
-                {role}
-              </div>
+              CFG Digital Twin
+            </h1>
+
+            <p style={{ fontSize: '0.95rem', color: muted, maxWidth: 560, lineHeight: 1.8, margin: '0 0 28px' }}>
+              Jumeau Numérique Ferroviaire — Plateforme intelligente de surveillance
+              et de prédiction des risques pour Chemin de Fer de Gafsa
+            </p>
+          </Reveal>
+
+          {/* Stats row */}
+          <Reveal delay={0.1}>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+              {STATS.map(({ val, label, color }) => (
+                <div key={label} style={{
+                  padding: '8px 18px', borderRadius: 12,
+                  background: isDark ? `${color}14` : `${color}10`,
+                  border: `1px solid ${color}30`,
+                  display: 'flex', alignItems: 'center', gap: 8,
+                }}>
+                  <span style={{ fontSize: '1.1rem', fontWeight: 800, color }}>{val}</span>
+                  <span style={{ fontSize: '0.7rem', color: muted }}>{label}</span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-      </GlassCard>
-
-      {/* ── Équipe ── */}
-      <div style={{ maxWidth: '800px' }}>
-        <SectionLabel>ÉQUIPE</SectionLabel>
-        <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-          {TEAM.map(({ role, name, detail }) => (
-            <GlassCard key={role} style={{ padding: '18px 22px', flex: '1', minWidth: '180px' }}>
-              <div style={{ fontSize: '0.55rem', letterSpacing: '0.35em', opacity: 0.35, marginBottom: '8px' }}>
-                {role}
-              </div>
-              <div style={{ fontSize: '0.82rem', letterSpacing: '0.06em', marginBottom: '4px' }}>
-                {name}
-              </div>
-              <div style={{ fontSize: '0.62rem', opacity: 0.4, lineHeight: '1.6' }}>
-                {detail}
-              </div>
-            </GlassCard>
-          ))}
+          </Reveal>
         </div>
       </div>
 
-      {/* ── Footer note ── */}
-      <div style={{ marginTop: '40px', fontSize: '0.6rem', opacity: 0.2, letterSpacing: '0.15em', maxWidth: '800px' }}>
-        Preuve de concept — conçue pour la prise de décision et la surveillance d'infrastructure
-        sans connectivité capteur physique ni certification industrielle.
-      </div>
+      {/* ── Main content — centered ─────────────────────────── */}
+      <div style={{
+        maxWidth: 960,
+        margin: '0 auto',
+        marginLeft: 'max(80px, calc(50% - 480px + 80px))',
+        padding: '48px 40px 72px',
+        display: 'flex', flexDirection: 'column', gap: 56,
+      }}>
 
+        {/* Contexte */}
+        <section>
+          <SectionTitle isDark={isDark} faint={faint}>Contexte du projet</SectionTitle>
+          <Reveal delay={0.05}>
+            <div style={{ background: card, borderRadius: 20, border: `1px solid ${border}`, boxShadow: shadow, padding: '28px 32px', backdropFilter: isDark ? 'blur(20px)' : 'none', position: 'relative', overflow: 'hidden' }}>
+              {isDark && <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 2, background: 'linear-gradient(90deg, #6366f1, #06b6d4, transparent)' }} />}
+              <p style={{ fontSize: '0.9rem', lineHeight: 2, color: muted, margin: 0 }}>
+                La machine de mesure physique de Chemin de Fer de Gafsa, dont la réparation représente
+                plusieurs millions de dinars, est hors service. Ce jumeau numérique constitue une alternative
+                intelligente et économique : il simule l'infrastructure ferroviaire en temps réel dans un
+                environnement 3D interactif, intègre des données météorologiques en direct, et s'appuie
+                sur un agent IA pour détecter et anticiper les situations dangereuses avant qu'elles
+                ne se produisent sur le terrain.
+              </p>
+            </div>
+          </Reveal>
+        </section>
+
+        {/* Features grid */}
+        <section>
+          <SectionTitle isDark={isDark} faint={faint}>Fonctionnalités clés</SectionTitle>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 16 }}>
+            {FEATURES.map(({ icon, title, desc, color }, i) => (
+              <Reveal key={title} delay={i * 0.07} direction="scale">
+                <div className="lift" style={{
+                  background: card, borderRadius: 16, border: `1px solid ${border}`,
+                  boxShadow: shadow, padding: '20px 22px',
+                  backdropFilter: isDark ? 'blur(16px)' : 'none',
+                  borderTop: `3px solid ${color}`, height: '100%',
+                }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 12, background: `${color}18`, border: `1px solid ${color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', marginBottom: 14 }}>
+                    {icon}
+                  </div>
+                  <div style={{ fontSize: '0.84rem', fontWeight: 700, color: text, marginBottom: 7 }}>{title}</div>
+                  <div style={{ fontSize: '0.76rem', color: muted, lineHeight: 1.7 }}>{desc}</div>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </section>
+
+        {/* Tech stack */}
+        <section>
+          <SectionTitle isDark={isDark} faint={faint}>Stack technique</SectionTitle>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 12 }}>
+            {TECH.map(({ cat, tech, color, desc }, i) => (
+              <Reveal key={tech} delay={i * 0.06} direction="left">
+                <div className="lift" style={{
+                  background: card, borderRadius: 14, border: `1px solid ${border}`,
+                  boxShadow: shadow, padding: '14px 16px',
+                  backdropFilter: isDark ? 'blur(16px)' : 'none',
+                  display: 'flex', gap: 12, alignItems: 'flex-start',
+                }}>
+                  <div style={{ width: 36, height: 36, borderRadius: 9, background: `${color}18`, border: `1px solid ${color}30`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <div style={{ width: 10, height: 10, borderRadius: '50%', background: color }} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.56rem', color: faint, letterSpacing: '0.2em', marginBottom: 2, fontFamily: 'monospace' }}>{cat}</div>
+                    <div style={{ fontSize: '0.84rem', fontWeight: 700, color, marginBottom: 4 }}>{tech}</div>
+                    <div style={{ fontSize: '0.7rem', color: muted, lineHeight: 1.5 }}>{desc}</div>
+                  </div>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </section>
+
+        {/* Team */}
+        <section>
+          <SectionTitle isDark={isDark} faint={faint}>Équipe</SectionTitle>
+          <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
+            {TEAM.map(({ role, name, detail, color, init }, i) => (
+              <Reveal key={role} delay={i * 0.1} style={{ flex: 1, minWidth: 200 }}>
+                <div className="lift" style={{
+                  background: card, borderRadius: 20, border: `1px solid ${border}`,
+                  boxShadow: shadow, padding: '28px 24px',
+                  backdropFilter: isDark ? 'blur(16px)' : 'none',
+                  borderTop: `3px solid ${color}`, textAlign: 'center',
+                }}>
+                  <div style={{ width: 56, height: 56, borderRadius: '50%', margin: '0 auto 16px', background: `${color}18`, border: `2px solid ${color}40`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', fontWeight: 800, color, fontFamily: 'monospace' }}>
+                    {init}
+                  </div>
+                  <div style={{ fontSize: '0.56rem', letterSpacing: '0.25em', color: faint, marginBottom: 7, fontFamily: 'monospace' }}>{role.toUpperCase()}</div>
+                  <div style={{ fontSize: '0.9rem', fontWeight: 700, color: text, marginBottom: 6 }}>{name}</div>
+                  <div style={{ fontSize: '0.74rem', color: muted, lineHeight: 1.6 }}>{detail}</div>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </section>
+
+        {/* Footer note */}
+        <Reveal>
+          <p style={{ fontSize: '0.65rem', color: faint, letterSpacing: '0.12em', fontFamily: 'monospace', textAlign: 'center' }}>
+            Preuve de concept — conçue pour la prise de décision et la surveillance d'infrastructure
+            sans connectivité capteur physique ni certification industrielle.
+          </p>
+        </Reveal>
+
+      </div>
     </div>
   )
 }

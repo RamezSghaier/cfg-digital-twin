@@ -3,8 +3,8 @@ import { useFrame } from '@react-three/fiber'
 import { useGLTF, OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 
-export default function RailsInspectModel() {
-  const { scene } = useGLTF('/models/rails_inspect.glb')
+export default function RailsInspectModel({ modelPath = '/models/rails_inspect.glb' }) {
+  const { scene } = useGLTF(modelPath)
   const groupRef  = useRef()
 
   const clonedScene = useMemo(() => {
@@ -48,3 +48,4 @@ export default function RailsInspectModel() {
 }
 
 useGLTF.preload('/models/rails_inspect.glb')
+useGLTF.preload('/models/voie_bibloc.glb')

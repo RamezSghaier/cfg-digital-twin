@@ -17,3 +17,40 @@ html, body, #root {
 /* Hide scrollbar globally but keep scrolling functional */
 ::-webkit-scrollbar { display: none; }
 * { scrollbar-width: none; }
+
+/* ── Global animation keyframes ─────────────────────────────── */
+@keyframes fadeUp   { from { opacity:0; transform:translateY(22px) } to { opacity:1; transform:translateY(0) } }
+@keyframes fadeDown { from { opacity:0; transform:translateY(-18px)} to { opacity:1; transform:translateY(0) } }
+@keyframes fadeLeft { from { opacity:0; transform:translateX(22px) } to { opacity:1; transform:translateX(0) } }
+@keyframes fadeIn   { from { opacity:0 }                             to { opacity:1 }                         }
+@keyframes scaleIn  { from { opacity:0; transform:scale(0.93) }      to { opacity:1; transform:scale(1) }     }
+@keyframes slideUp  { from { transform:translateY(100%) }            to { transform:translateY(0) }           }
+
+/* ── Hover lift utility ──────────────────────────────────────── */
+.lift { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.lift:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+
+/* ── Light mode: heavier weights + better rendering ─────────── */
+html[data-theme="light"] {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html[data-theme="light"] div,
+html[data-theme="light"] span,
+html[data-theme="light"] p,
+html[data-theme="light"] label,
+html[data-theme="light"] td,
+html[data-theme="light"] th,
+html[data-theme="light"] li,
+html[data-theme="light"] button,
+html[data-theme="light"] textarea,
+html[data-theme="light"] input {
+  font-weight: 500;
+}
+
+html[data-theme="light"] h1,
+html[data-theme="light"] h2,
+html[data-theme="light"] h3 {
+  font-weight: 700;
+}

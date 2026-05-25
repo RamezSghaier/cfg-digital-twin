@@ -80,7 +80,7 @@ async def _fetch_historical_weather(target_date: date) -> dict:
             "temperature_2m_min",
             "precipitation_sum",
             "windspeed_10m_max",
-            "visibility_m",
+            "weathercode",
         ]),
         "timezone": "Africa/Tunis",
     }
@@ -95,20 +95,23 @@ async def _fetch_historical_weather(target_date: date) -> dict:
         vals = daily.get(key, [None])
         return vals[0] if vals else None
 
-    temp_max   = first("temperature_2m_max")
-    temp_min   = first("temperature_2m_min")
-    precip     = first("precipitation_sum") or 0.0
-    wind_max   = first("windspeed_10m_max") or 0.0
-    visibility = first("visibility_m")
+    temp_max    = first("temperature_2m_max")
+    temp_min    = first("temperature_2m_min")
+    precip      = first("precipitation_sum") or 0.0
+    wind_max    = first("windspeed_10m_max") or 0.0
+    weathercode = first("weathercode") or 0
 
-    # Map to a simple weather code
-    if precip and precip >= 50:
-        code = "heavy_rain"
-    elif precip and precip > 5:
-        code = "rain"
-    elif visibility is not None and visibility < 1000:
+    # WMO weathercode → simple tag
+    # codes 45/48 = fog, 51-67/80-82 = rain, 71-77 = snow, 95-99 = storm, 30-35 = sandstorm
+    if weathercode in (45, 48):
         code = "fog"
-    elif wind_max and wind_max > 60:
+    elif precip >= 50:
+        code = "heavy_rain"
+    elif precip > 5 or weathercode in range(51, 83):
+        code = "rain"
+    elif weathercode in range(30, 36):
+        code = "sandstorm"
+    elif wind_max > 60:
         code = "sandstorm"
     else:
         code = "clear"
@@ -120,7 +123,7 @@ async def _fetch_historical_weather(target_date: date) -> dict:
         "temperature_min": temp_min,
         "precipitation_mm": precip,
         "wind_max_kmh": wind_max,
-        "visibility_m": visibility,
+        "weathercode": weathercode,
         "weather_code": code,
     }
 

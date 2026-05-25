@@ -17,6 +17,9 @@ class Settings(BaseSettings):
     weather_api_key: str = ""
     weather_city: str = "Gafsa,TN"
 
+    # First admin bootstrap — only this email is auto-promoted when no admins exist
+    first_admin_email: str = ""
+
     # CORS — comma-separated list of allowed origins
     cors_origins: str = "http://localhost:5173"
 
