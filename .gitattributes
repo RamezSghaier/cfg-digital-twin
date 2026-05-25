@@ -1,1 +1,1 @@
-pfe/public/models/*.glb filter=lfs diff=lfs merge=lfs -text
+# No LFS tracking — models are downloaded at build time from GitHub Releases

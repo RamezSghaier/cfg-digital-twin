@@ -27,7 +27,8 @@ esp32/CFG_GPS_Sender/.vscode/extensions.json
 .vscode/launch.json
 .vscode/tasks.json
 
-# ── Large 3D model files — tracked via Git LFS ───────────────────────────────
+# ── Large 3D model files — downloaded at build time from GitHub Releases ─────
+pfe/public/models/*.glb
 pfe/public/models/*.blend
 pfe/public/models/*.fbx
 pfe/public/models/*.obj
