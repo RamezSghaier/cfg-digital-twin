@@ -710,13 +710,6 @@ export default function HomePage() {
         return new CSS2DObject(wrap)
       }
 
-      // ── Train hotspot — parented to loco so it follows the animation ─────
-      // Position in loco LOCAL space: centre XZ, above the roof
-      const locoHeight = (locoBox.max.y - locoBox.min.y) / loco.scale.y
-      const trainDot   = makeDot('train')
-      trainDot.position.set(0, locoHeight * 0.5 + 2, 0)   // local Y above roof
-      loco.add(trainDot)
-
       // ── Rails hotspot — navigates to voie_bibloc when bibloc is active ─────
       const railsDot = makeDot(() =>
         currentVoieRef.current === 'Traverse Béton Bibloc' ? 'voie_bibloc' : 'rails'
@@ -724,7 +717,7 @@ export default function HomePage() {
       railsDot.position.set(8, 0, 0)   // local space: side + rail level
       loco.add(railsDot)
 
-      cleanupHotspots = () => { loco.remove(trainDot); loco.remove(railsDot) }
+      cleanupHotspots = () => { loco.remove(railsDot) }
 
       // ── Hide loading indicator once everything is ready ────────────────────
       if (loadingDiv.parentNode) loadingDiv.parentNode.removeChild(loadingDiv)
