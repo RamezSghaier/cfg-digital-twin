@@ -40,7 +40,7 @@ async def sync_user(
     if payload.role == "pending_admin":
         admin_count = await db.users.count_documents({"role": "admin"})
         user_email = current_user.get("email", "")
-        if admin_count == 0 and settings.first_admin_email and user_email == settings.first_admin_email:
+        if admin_count == 0 and settings.first_admin_email and user_email.strip().lower() == settings.first_admin_email.strip().lower():
             effective_role = "admin"
 
     await db.users.update_one(
