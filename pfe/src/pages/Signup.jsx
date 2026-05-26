@@ -52,14 +52,9 @@ function RoleSelection({ onSelect, onBack }) {
 
   return (
     <div style={{
-      position: 'fixed', top: 0, right: 0,
-      width: '50%', height: '100vh',
+      height: '100vh',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       fontFamily: 'monospace', pointerEvents: 'all',
-      background: 'linear-gradient(to left, rgba(4,9,26,0.85) 60%, rgba(4,9,26,0.3) 100%)',
-      backdropFilter: 'blur(6px)',
-      WebkitBackdropFilter: 'blur(6px)',
-      borderLeft: '1px solid rgba(255,255,255,0.06)',
     }}>
       <style>{SHARED_STYLES}</style>
 
@@ -68,8 +63,9 @@ function RoleSelection({ onSelect, onBack }) {
         overflow: 'hidden',
         backdropFilter: 'blur(48px) saturate(180%) brightness(1.15)',
         WebkitBackdropFilter: 'blur(48px) saturate(180%) brightness(1.15)',
-        background: 'rgba(255,255,255,0.04)',
-        border: '1px solid rgba(255,255,255,0.1)',
+        backdropFilter: 'blur(48px) saturate(180%) brightness(1.15)',
+        WebkitBackdropFilter: 'blur(48px) saturate(180%) brightness(1.15)',
+        background: 'rgba(220, 235, 255, 0.10)',
         borderRadius: '28px',
         padding: '3.5rem',
         display: 'flex',
@@ -251,14 +247,9 @@ function SignupForm({ role, onSwitchToLogin, onBack }) {
 
   return (
     <div style={{
-      position: 'fixed', top: 0, right: 0,
-      width: '50%', height: '100vh',
+      height: '100vh',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       fontFamily: 'monospace', pointerEvents: 'all',
-      background: 'linear-gradient(to left, rgba(4,9,26,0.85) 60%, rgba(4,9,26,0.3) 100%)',
-      backdropFilter: 'blur(6px)',
-      WebkitBackdropFilter: 'blur(6px)',
-      borderLeft: '1px solid rgba(255,255,255,0.06)',
     }}>
       <style>{SHARED_STYLES}</style>
 
@@ -268,8 +259,9 @@ function SignupForm({ role, onSwitchToLogin, onBack }) {
         overflow: 'hidden',
         backdropFilter: 'blur(48px) saturate(180%) brightness(1.15)',
         WebkitBackdropFilter: 'blur(48px) saturate(180%) brightness(1.15)',
-        background: 'rgba(255,255,255,0.04)',
-        border: '1px solid rgba(255,255,255,0.1)',
+        backdropFilter: 'blur(48px) saturate(180%) brightness(1.15)',
+        WebkitBackdropFilter: 'blur(48px) saturate(180%) brightness(1.15)',
+        background: 'rgba(220, 235, 255, 0.10)',
         borderRadius: '28px',
         padding: '3.5rem',
         display: 'flex',
