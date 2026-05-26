@@ -140,6 +140,7 @@ async def predict_scenario(
     db = request.app.state.db
     try:
         result = await run_journal_agent(db, date)
+        result["date"] = date  # ensure date is always present (fallback may omit it)
         await save_prediction(db, date, result)
         return result
     except Exception as e:

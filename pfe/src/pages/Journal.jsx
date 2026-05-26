@@ -422,7 +422,7 @@ export default function Journal() {
         setPrediction(pred)
         if (iso >= today) {
           setRiskDates(prev => new Map(prev).set(iso, pred.risk_level))
-          setFuturePreds(prev => [...prev.filter(p => p.date !== iso), pred].sort((a, b) => a.date.localeCompare(b.date)))
+          setFuturePreds(prev => [...prev.filter(p => p.date !== iso), pred].sort((a, b) => (a.date || '').localeCompare(b.date || '')))
         }
       }
     } catch {}
