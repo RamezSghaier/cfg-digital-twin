@@ -329,27 +329,29 @@ export default function HomePage() {
   useEffect(() => {
     const mount = mountRef.current
 
-    // ── Loading indicator ─────────────────────────────────────────────────────
+    // ── Loading indicator — scoped inside mount so sidebar stays usable ────────
     const loadingDiv = document.createElement('div')
     loadingDiv.style.cssText = [
-      'position:fixed', 'inset:0', 'display:flex', 'flex-direction:column',
-      'align-items:center', 'justify-content:center', 'gap:18px',
-      'font-family:monospace', 'background:#04091a', 'z-index:9999', 'pointer-events:none',
+      'position:absolute', 'bottom:28px', 'left:50%', 'transform:translateX(-50%)',
+      'display:flex', 'flex-direction:column', 'align-items:center', 'gap:8px',
+      'font-family:monospace', 'z-index:20', 'pointer-events:none',
     ].join(';')
     loadingDiv.innerHTML = `
-      <div style="font-size:0.7rem;letter-spacing:0.35em;color:#70c1ff;opacity:0.5">CHARGEMENT DE LA SCÈNE</div>
-      <div id="ld-label" style="font-size:0.85rem;letter-spacing:0.2em;color:#70c1ff;font-weight:700">0 / 4</div>
-      <div style="width:180px;height:3px;background:rgba(112,193,255,0.12);border-radius:2px;overflow:hidden">
-        <div id="ld-bar" style="height:100%;width:0%;background:#70c1ff;border-radius:2px;transition:width 0.3s ease"></div>
+      <div style="font-size:0.6rem;letter-spacing:0.3em;color:rgba(112,193,255,0.5)">CHARGEMENT DES MODÈLES</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div id="ld-label" style="font-size:0.75rem;letter-spacing:0.15em;color:#70c1ff;font-weight:700;min-width:32px">0/4</div>
+        <div style="width:140px;height:2px;background:rgba(112,193,255,0.12);border-radius:2px;overflow:hidden">
+          <div id="ld-bar" style="height:100%;width:0%;background:#70c1ff;border-radius:2px;transition:width 0.35s ease"></div>
+        </div>
       </div>`
-    document.body.appendChild(loadingDiv)
+    mount.appendChild(loadingDiv)
     loaderRef.current = loadingDiv
     let _loaded = 0
     function _onModelLoaded() {
       _loaded++
       const lbl = loadingDiv.querySelector('#ld-label')
       const bar = loadingDiv.querySelector('#ld-bar')
-      if (lbl) lbl.textContent = `${_loaded} / 4`
+      if (lbl) lbl.textContent = `${_loaded}/4`
       if (bar) bar.style.width = `${_loaded * 25}%`
     }
 
