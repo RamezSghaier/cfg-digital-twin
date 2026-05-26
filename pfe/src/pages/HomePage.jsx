@@ -331,17 +331,27 @@ export default function HomePage() {
 
     // ── Loading indicator ─────────────────────────────────────────────────────
     const loadingDiv = document.createElement('div')
-    loadingDiv.innerText = 'Loading scene...'
     loadingDiv.style.cssText = [
-      'position:fixed', 'inset:0', 'display:flex',
-      'align-items:center', 'justify-content:center',
-      'font-family:monospace', 'font-size:1.1rem',
-      'color:#fff', 'background:rgba(0,0,0,0.75)',
-      'z-index:9999', 'letter-spacing:0.2em',
-      'pointer-events:none',
+      'position:fixed', 'inset:0', 'display:flex', 'flex-direction:column',
+      'align-items:center', 'justify-content:center', 'gap:18px',
+      'font-family:monospace', 'background:#04091a', 'z-index:9999', 'pointer-events:none',
     ].join(';')
+    loadingDiv.innerHTML = `
+      <div style="font-size:0.7rem;letter-spacing:0.35em;color:#70c1ff;opacity:0.5">CHARGEMENT DE LA SCÈNE</div>
+      <div id="ld-label" style="font-size:0.85rem;letter-spacing:0.2em;color:#70c1ff;font-weight:700">0 / 4</div>
+      <div style="width:180px;height:3px;background:rgba(112,193,255,0.12);border-radius:2px;overflow:hidden">
+        <div id="ld-bar" style="height:100%;width:0%;background:#70c1ff;border-radius:2px;transition:width 0.3s ease"></div>
+      </div>`
     document.body.appendChild(loadingDiv)
     loaderRef.current = loadingDiv
+    let _loaded = 0
+    function _onModelLoaded() {
+      _loaded++
+      const lbl = loadingDiv.querySelector('#ld-label')
+      const bar = loadingDiv.querySelector('#ld-bar')
+      if (lbl) lbl.textContent = `${_loaded} / 4`
+      if (bar) bar.style.width = `${_loaded * 25}%`
+    }
 
     let animFrameId
     let weatherManager
@@ -360,7 +370,7 @@ export default function HomePage() {
 
     // ── Renderer ──────────────────────────────────────────────────────────────
     const renderer = new THREE.WebGLRenderer({ antialias: true, outputBufferType: THREE.HalfFloatType })
-    renderer.setPixelRatio(window.devicePixelRatio)
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5))
     renderer.setSize(window.innerWidth, window.innerHeight)
     renderer.toneMapping         = THREE.ACESFilmicToneMapping
     renderer.toneMappingExposure = 0.1
@@ -456,8 +466,8 @@ export default function HomePage() {
     const dirLight = new THREE.DirectionalLight(0xfff4cc, 2)
     dirLight.position.set(80, 120, -60)   // above and angled
     dirLight.castShadow              = true
-    dirLight.shadow.mapSize.width    = 2048
-    dirLight.shadow.mapSize.height   = 2048
+    dirLight.shadow.mapSize.width    = 1024
+    dirLight.shadow.mapSize.height   = 1024
     dirLight.shadow.camera.near      = 1
     dirLight.shadow.camera.far       = 1000
     dirLight.shadow.camera.left      = -300
@@ -521,11 +531,12 @@ export default function HomePage() {
     // ── Load all 3 GLB models ─────────────────────────────────────────────────
     const loader = new GLTFLoader()
 
+    const _p = url => loadGLTF(loader, url).then(r => { _onModelLoaded(); return r })
     Promise.all([
-      loadGLTF(loader, '/models/terrainFinal.glb'),
-      loadGLTF(loader, '/models/RailsPath.glb'),
-      loadGLTF(loader, '/models/locomotiveFinale.glb'),
-      loadGLTF(loader, '/models/wagonFinal.glb'),
+      _p('/models/terrainFinal.glb'),
+      _p('/models/RailsPath.glb'),
+      _p('/models/locomotiveFinale.glb'),
+      _p('/models/wagonFinal.glb'),
     ]).then(([terrainGLTF, railsGLTF, locoGLTF, wagonGLTF]) => {
 
       // Helper: add to scene, compute world bbox, then reposition so that
@@ -812,7 +823,8 @@ export default function HomePage() {
         controls.update()
       }
 
-      composer.render()
+      if (bloomPass.strength > 0) composer.render()
+      else renderer.render(scene, camera)
       labelRenderer.render(scene, camera)
       stats.update()
     }
