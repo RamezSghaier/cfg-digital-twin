@@ -139,7 +139,7 @@ export default function Login({ onSwitchToSignup, onBack }) {
         <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-            <label style={{ fontSize: '0.55rem', letterSpacing: '0.35em', color: '#fcd34d', textShadow: '0 0 6px #fbbf24, 0 0 18px rgba(251,191,36,0.5)' }}>EMAIL</label>
+            <label style={{ fontSize: '0.55rem', letterSpacing: '0.35em', color: '#4FC3F7', textShadow: '0 0 6px #4FC3F7, 0 0 18px rgba(79,195,247,0.5)' }}>EMAIL</label>
             <input
               type="email"
               placeholder="exemple@email.com"
@@ -153,7 +153,7 @@ export default function Login({ onSwitchToSignup, onBack }) {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-            <label style={{ fontSize: '0.55rem', letterSpacing: '0.35em', color: '#fcd34d', textShadow: '0 0 6px #fbbf24, 0 0 18px rgba(251,191,36,0.5)' }}>MOT DE PASSE</label>
+            <label style={{ fontSize: '0.55rem', letterSpacing: '0.35em', color: '#4FC3F7', textShadow: '0 0 6px #4FC3F7, 0 0 18px rgba(79,195,247,0.5)' }}>MOT DE PASSE</label>
             <input
               type="password"
               placeholder="••••••••"
