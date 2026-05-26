@@ -26,7 +26,7 @@ async function syncRoleMongo(user, role) {
 }
 
 const SHARED_STYLES = `
-  ::placeholder { color: rgba(255,255,255,0.35); }
+  ::placeholder { color: rgba(255,255,255,0.5); }
   @keyframes scanLine {
     0%   { transform: translateY(-100%); opacity: 0.3; }
     100% { transform: translateY(600%);  opacity: 0;   }
@@ -66,7 +66,7 @@ function RoleSelection({ onSelect, onBack }) {
         overflow: 'hidden',
         backdropFilter: 'blur(48px) saturate(180%) brightness(1.15)',
         WebkitBackdropFilter: 'blur(48px) saturate(180%) brightness(1.15)',
-        background: 'rgba(220, 235, 255, 0.10)',
+        background: 'rgba(220, 235, 255, 0.16)',
         borderRadius: '28px',
         padding: '3.5rem',
         display: 'flex',
@@ -234,8 +234,8 @@ function SignupForm({ role, onSwitchToLogin, onBack }) {
   const inputStyle = (name) => ({
     width: '100%',
     padding: '1rem 1.2rem',
-    background: focused === name ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.05)',
-    border: `1px solid ${focused === name ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.22)'}`,
+    background: focused === name ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.09)',
+    border: `1px solid ${focused === name ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.45)'}`,
     borderRadius: '12px',
     color: '#ffffff',
     fontFamily: 'monospace',
@@ -263,7 +263,7 @@ function SignupForm({ role, onSwitchToLogin, onBack }) {
         overflow: 'hidden',
         backdropFilter: 'blur(48px) saturate(180%) brightness(1.15)',
         WebkitBackdropFilter: 'blur(48px) saturate(180%) brightness(1.15)',
-        background: 'rgba(220, 235, 255, 0.10)',
+        background: 'rgba(220, 235, 255, 0.16)',
         borderRadius: '28px',
         padding: '3.5rem',
         display: 'flex',
@@ -318,7 +318,7 @@ function SignupForm({ role, onSwitchToLogin, onBack }) {
             { name: 'confirm',  type: 'password', label: 'CONFIRMER MOT DE PASSE', placeholder: '••••••••',          value: confirm,     onChange: setConfirm,     required: true  },
           ].map(({ name, type, label, placeholder, value, onChange, required }) => (
             <div key={name} style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-              <label style={{ fontSize: '0.55rem', letterSpacing: '0.35em', color: 'rgba(255,255,255,0.45)' }}>{label}</label>
+              <label style={{ fontSize: '0.55rem', letterSpacing: '0.35em', color: 'rgba(255,255,255,0.8)' }}>{label}</label>
               <input
                 type={type}
                 placeholder={placeholder}
@@ -370,7 +370,7 @@ function SignupForm({ role, onSwitchToLogin, onBack }) {
         {/* Divider */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.15)' }} />
-          <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.65rem', letterSpacing: '0.25em' }}>OU</span>
+          <span style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.65rem', letterSpacing: '0.25em' }}>OU</span>
           <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.15)' }} />
         </div>
 
@@ -403,7 +403,7 @@ function SignupForm({ role, onSwitchToLogin, onBack }) {
         </button>
 
         {/* Footer */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', letterSpacing: '0.06em' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: 'rgba(255,255,255,0.7)', letterSpacing: '0.06em' }}>
           <span onClick={onBack} style={{ color: 'rgba(255,255,255,0.7)', cursor: 'pointer', textDecoration: 'underline', textUnderlineOffset: '3px' }}>
             ← Changer de rôle
           </span>
