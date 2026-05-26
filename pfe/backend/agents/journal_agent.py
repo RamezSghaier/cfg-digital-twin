@@ -170,6 +170,19 @@ async def run_journal_agent(db, date_str: str) -> dict:
         entry = dict(seg)
         entry["rail_risk"] = calculate_rail_risk_score(seg)
         enriched_segments.append(entry)
+
+    # Keep only the 10 highest-risk segments to stay within token limits
+    enriched_segments.sort(key=lambda s: s.get("rail_risk", 0), reverse=True)
+    top_segments = enriched_segments[:10]
+    segments_summary = {
+        "total": len(enriched_segments),
+        "critique": sum(1 for s in enriched_segments if s.get("status") in ("CRITIQUE", "ÉLEVÉ")),
+        "modere": sum(1 for s in enriched_segments if s.get("status") == "MODÉRÉ"),
+        "normal": sum(1 for s in enriched_segments if s.get("status") == "NORMAL"),
+        "alerte": sum(1 for s in enriched_segments if s.get("statut") == "ALERTE"),
+        "rayon_min_m": min((s.get("rayon_m", 9999) for s in enriched_segments), default=None),
+        "top_10_risque": top_segments,
+    }
     sources_used.append("MongoDB — données segments et usure rails CFG")
 
     # ── 4. Fetch existing journal entry for context ───────────────────────────
@@ -186,7 +199,7 @@ async def run_journal_agent(db, date_str: str) -> dict:
     user_content = json.dumps({
         "date": date_str,
         "meteo": weather_data,
-        "segments": enriched_segments,
+        "segments": segments_summary,
         "journal_existant": existing_entry,
         "scenarios_disponibles": scenario_list,
         "seuils_reference": {
