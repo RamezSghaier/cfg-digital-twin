@@ -172,7 +172,7 @@ async def run_journal_agent(db, date_str: str) -> dict:
         enriched_segments.append(entry)
 
     # Keep only the 10 highest-risk segments to stay within token limits
-    enriched_segments.sort(key=lambda s: s.get("rail_risk", 0), reverse=True)
+    enriched_segments.sort(key=lambda s: (s.get("rail_risk") or {}).get("score", 0), reverse=True)
     top_segments = enriched_segments[:10]
     segments_summary = {
         "total": len(enriched_segments),
