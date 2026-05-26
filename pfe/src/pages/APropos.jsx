@@ -2,22 +2,23 @@ import { useRef, useEffect, useState } from 'react'
 import { useTheme } from '../contexts/ThemeContext'
 
 const FEATURES = [
-  { icon: '🧊', title: 'Simulation 3D',       desc: 'Train interactif temps réel avec contrôles caméra et inspection des rails', color: '#6366f1' },
-  { icon: '🤖', title: 'Agent IA',             desc: 'Analyse en langage naturel, identification et déclenchement de scénarios', color: '#06b6d4' },
-  { icon: '🌤️', title: 'Météo intégrée',       desc: 'Données en direct avec effets visuels adaptatifs dans la scène 3D',       color: '#f59e0b' },
-  { icon: '⚠️', title: 'Scénarios de risque',  desc: 'Déraillement, usure rails, brouillard, inondation, panne freins…',        color: '#ef4444' },
-  { icon: '📅', title: 'Journal & Calendrier', desc: 'Historique des sessions, prédictions IA et rejeu des simulations',         color: '#10b981' },
-  { icon: '🔐', title: 'Accès par rôle',        desc: 'Admin (alertes, CRUD courbures) vs Utilisateur (simulation et IA)',       color: '#8b5cf6' },
+  { icon: '🧊', title: 'Simulation 3D',       desc: 'Scène WebGL interactive — train animé, caméra follow/libre, inspection des rails UIC 54 kg en temps réel', color: '#6366f1' },
+  { icon: '🤖', title: 'Agents IA',            desc: 'Agent chat (analyse langage naturel) + agent journal (prédit le scénario à risque à partir des conditions réelles du jour)', color: '#06b6d4' },
+  { icon: '🌤️', title: 'Météo intégrée',       desc: 'OpenWeatherMap en direct + Open-Meteo historique — effets visuels adaptatifs (pluie, brouillard, tempête de sable…) dans la scène 3D', color: '#f59e0b' },
+  { icon: '⚠️', title: 'Scénarios de risque',  desc: '7 scénarios simulés : déraillement, usure rails, brouillard dense, surcharge voie, inondation, défaillance frein, courbure critique', color: '#ef4444' },
+  { icon: '📅', title: 'Journal & Calendrier', desc: 'Historique des sessions de simulation, prédictions IA par date et rejeu direct des scénarios depuis le calendrier', color: '#10b981' },
+  { icon: '🔐', title: 'Accès par rôle',        desc: 'Admin : alertes, CRUD segments, approbation utilisateurs — Opérateur : simulation 3D, agent IA, journal', color: '#8b5cf6' },
 ]
 
 const TECH = [
-  { cat: '3D',     tech: 'Three.js',        color: '#f97316', desc: 'Rendu temps réel, contrôles caméra, effets visuels' },
-  { cat: 'Front',  tech: 'React + Vite',    color: '#06b6d4', desc: 'SPA, routing, gestion d\'état réactif' },
-  { cat: 'Back',   tech: 'FastAPI',         color: '#10b981', desc: 'API REST, agents IA, traitement données' },
-  { cat: 'BDD',    tech: 'MongoDB',         color: '#4ade80', desc: 'Courbures, sessions, journaux, prédictions' },
-  { cat: 'Auth',   tech: 'Firebase',        color: '#fbbf24', desc: 'Connexion sécurisée, rôles admin / user' },
-  { cat: 'Météo',  tech: 'Open-Meteo',      color: '#38bdf8', desc: 'Historique et prévisions météo gratuites' },
-  { cat: 'AI',     tech: 'Groq / Llama 3',  color: '#a78bfa', desc: 'Inférence rapide, analyse de risques' },
+  { cat: '3D',     tech: 'Three.js',           color: '#f97316', desc: 'Rendu WebGL, post-processing bloom, sky procédural, EffectComposer' },
+  { cat: 'Front',  tech: 'React + Vite',        color: '#06b6d4', desc: 'SPA, React Router, lazy loading, gestion d\'état réactif' },
+  { cat: 'Back',   tech: 'FastAPI',             color: '#10b981', desc: 'API REST Python, agents IA asynchrones, Railway cloud' },
+  { cat: 'BDD',    tech: 'MongoDB Atlas',       color: '#4ade80', desc: '215 segments de courbure, journaux, prédictions, alertes' },
+  { cat: 'Auth',   tech: 'Firebase Auth',       color: '#fbbf24', desc: 'Google OAuth + email/password, rôles admin / opérateur' },
+  { cat: 'Météo',  tech: 'OWM + Open-Meteo',   color: '#38bdf8', desc: 'OpenWeatherMap (temps réel) + Open-Meteo archive (données historiques)' },
+  { cat: 'AI',     tech: 'Groq / LLaMA 3.3',   color: '#a78bfa', desc: 'llama-3.3-70b-versatile — chat opérateur et prédiction journal' },
+  { cat: 'Deploy', tech: 'Vercel + Railway',    color: '#f43f5e', desc: 'Frontend CDN mondial sur Vercel, backend FastAPI sur Railway' },
 ]
 
 const TEAM = [
@@ -27,10 +28,10 @@ const TEAM = [
 ]
 
 const STATS = [
-  { val: '7',    label: 'Scénarios',  color: '#6366f1' },
-  { val: '5',    label: 'Segments',   color: '#06b6d4' },
-  { val: '2',    label: 'Rôles',      color: '#10b981' },
-  { val: '100%', label: 'Open-source',color: '#f59e0b' },
+  { val: '7',    label: 'Scénarios',   color: '#6366f1' },
+  { val: '215',  label: 'Segments CFG',color: '#06b6d4' },
+  { val: '3',    label: 'Agents IA',   color: '#10b981' },
+  { val: '2',    label: 'Rôles',       color: '#f59e0b' },
 ]
 
 /* ── Scroll-reveal hook ─────────────────────────────────────── */
