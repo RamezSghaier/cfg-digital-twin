@@ -113,7 +113,7 @@ export default function Login({ onSwitchToSignup, onBack }) {
 
         {/* Header */}
         <div style={{ textAlign: 'center' }}>
-          <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.6rem', letterSpacing: '0.45em', marginBottom: '1rem', textShadow: '0 0 6px #fff, 0 0 14px rgba(112,193,255,0.5)' }}>
+          <div style={{ color: '#fff', fontSize: '0.6rem', letterSpacing: '0.45em', marginBottom: '1rem', textShadow: '0 0 5px #fff, 0 0 16px #70c1ff, 0 0 32px #70c1ff' }}>
             ACCÉDER AU SYSTÈME
           </div>
           <div style={{
@@ -136,7 +136,7 @@ export default function Login({ onSwitchToSignup, onBack }) {
         <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-            <label style={{ fontSize: '0.55rem', letterSpacing: '0.35em', color: 'rgba(255,255,255,0.85)', textShadow: '0 0 5px rgba(255,255,255,0.8), 0 0 12px rgba(112,193,255,0.4)' }}>EMAIL</label>
+            <label style={{ fontSize: '0.55rem', letterSpacing: '0.35em', color: '#fff', textShadow: '0 0 4px #fff, 0 0 14px #70c1ff, 0 0 28px #70c1ff' }}>EMAIL</label>
             <input
               type="email"
               placeholder="exemple@email.com"
@@ -150,7 +150,7 @@ export default function Login({ onSwitchToSignup, onBack }) {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-            <label style={{ fontSize: '0.55rem', letterSpacing: '0.35em', color: 'rgba(255,255,255,0.85)', textShadow: '0 0 5px rgba(255,255,255,0.8), 0 0 12px rgba(112,193,255,0.4)' }}>MOT DE PASSE</label>
+            <label style={{ fontSize: '0.55rem', letterSpacing: '0.35em', color: '#fff', textShadow: '0 0 4px #fff, 0 0 14px #70c1ff, 0 0 28px #70c1ff' }}>MOT DE PASSE</label>
             <input
               type="password"
               placeholder="••••••••"
@@ -201,7 +201,7 @@ export default function Login({ onSwitchToSignup, onBack }) {
         {/* Divider */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.15)' }} />
-          <span style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.65rem', letterSpacing: '0.25em' }}>OU</span>
+          <span style={{ color: '#fff', fontSize: '0.65rem', letterSpacing: '0.25em', textShadow: '0 0 4px #fff, 0 0 14px #70c1ff, 0 0 28px #70c1ff' }}>OU</span>
           <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.15)' }} />
         </div>
 
@@ -214,8 +214,9 @@ export default function Login({ onSwitchToSignup, onBack }) {
             background: 'rgba(255,255,255,0.05)',
             border: '1px solid rgba(255,255,255,0.22)',
             borderRadius: '14px',
-            color: 'rgba(255,255,255,0.8)',
+            color: '#fff',
             fontFamily: 'monospace', fontSize: '0.82rem', letterSpacing: '0.2em',
+            textShadow: '0 0 4px #fff, 0 0 14px #70c1ff, 0 0 28px #70c1ff',
             cursor: loading ? 'not-allowed' : 'pointer',
             transition: 'all 0.25s ease',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.8rem',
@@ -234,7 +235,7 @@ export default function Login({ onSwitchToSignup, onBack }) {
         </button>
 
         {/* Footer */}
-        <div style={{ textAlign: 'center', fontSize: '0.75rem', color: 'rgba(255,255,255,0.7)', letterSpacing: '0.08em' }}>
+        <div style={{ textAlign: 'center', fontSize: '0.75rem', color: '#fff', letterSpacing: '0.08em', textShadow: '0 0 4px #fff, 0 0 12px #70c1ff' }}>
           Pas de compte ?{' '}
           <span
             onClick={onSwitchToSignup}
