@@ -943,15 +943,21 @@ export default function HomePage() {
 
       {/* ── Top-left: logo ── */}
       <div style={{ position: 'absolute', top: '16px', left: '16px', zIndex: 50, pointerEvents: 'none', fontFamily: 'monospace' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>
-          <img src="/Logo_-_SNCFT.png" alt="SNCFT" style={{ height: 24, width: 'auto', filter: isDark ? 'brightness(0) invert(1)' : 'brightness(0)', opacity: isDark ? 0.75 : 0.8 }} />
-          <div style={{ width: 1, height: 18, background: isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.18)', flexShrink: 0 }} />
-          <div style={{ fontSize: '0.7rem', letterSpacing: '0.22em', fontWeight: 700, color: isDark ? '#e8f4ff' : '#0f172a', textShadow: isDark ? '0 0 14px rgba(112,193,255,0.45)' : 'none' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+          <img src="/Logo_-_SNCFT.png" alt="SNCFT" style={{ height: 42, width: 'auto', filter: isDark ? 'brightness(0)' : 'brightness(0) invert(1)', opacity: 1 }} />
+          <div style={{ width: 1, height: 30, background: isDark ? 'rgba(0,0,0,0.35)' : 'rgba(255,255,255,0.35)', flexShrink: 0 }} />
+          <div style={{ fontSize: '0.82rem', letterSpacing: '0.22em', fontWeight: 700, color: isDark ? '#0f172a' : '#e8f4ff', textShadow: 'none' }}>
             JUMEAU NUMÉRIQUE
           </div>
         </div>
-        <div style={{ fontSize: '0.44rem', letterSpacing: '0.32em', color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.4)', marginBottom: '2px' }}>SNCFT — ZONE SUD-OUEST</div>
-        <div style={{ fontSize: '0.6rem', letterSpacing: '0.12em', color: isDark ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.45)' }}>{clockTime}</div>
+        <div style={{ fontSize: '0.44rem', letterSpacing: '0.32em', color: isDark ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.5)', marginBottom: '6px' }}>SNCFT — ZONE SUD-OUEST</div>
+        <div style={{
+          fontSize: '1.9rem', fontWeight: 800, letterSpacing: '0.12em',
+          color: isDark ? '#0f172a' : '#70c1ff',
+          textShadow: isDark ? 'none' : '0 0 10px #70c1ff, 0 0 24px rgba(112,193,255,0.6)',
+          animation: 'clockGlow 2s ease-in-out infinite',
+          fontVariantNumeric: 'tabular-nums',
+        }}>{clockTime}</div>
       </div>
 
       {/* ── Back button — shown only when arriving from Journal/IA via scenario ── */}
@@ -1603,6 +1609,10 @@ export default function HomePage() {
       )}
 
       <style>{`
+        @keyframes clockGlow {
+          0%,100% { opacity: 1; }
+          50%     { opacity: 0.75; }
+        }
         @keyframes hud-dot   { 0%,100%{opacity:1} 50%{opacity:0.25} }
         @keyframes hud-alert { 0%,100%{box-shadow:0 0 0 0 rgba(248,113,113,0.25)} 50%{box-shadow:0 0 0 8px rgba(248,113,113,0)} }
         @keyframes drawerSlideUp { from { transform:translateY(40px); opacity:0; } to { transform:translateY(0); opacity:1; } }
