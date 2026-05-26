@@ -55,12 +55,14 @@ export default function Login({ onSwitchToSignup, onBack }) {
 
   return (
     <div style={{
-      height: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontFamily: 'monospace',
-      pointerEvents: 'all',
+      position: 'fixed', top: 0, right: 0,
+      width: '50%', height: '100vh',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      fontFamily: 'monospace', pointerEvents: 'all',
+      background: 'linear-gradient(to left, rgba(4,9,26,0.85) 60%, rgba(4,9,26,0.3) 100%)',
+      backdropFilter: 'blur(6px)',
+      WebkitBackdropFilter: 'blur(6px)',
+      borderLeft: '1px solid rgba(255,255,255,0.06)',
     }}>
       <style>{`
         ::placeholder { color: rgba(255,255,255,0.5); }
@@ -72,11 +74,10 @@ export default function Login({ onSwitchToSignup, onBack }) {
 
       <div style={{
         position: 'relative',
-        width: '440px',
+        width: '400px',
         overflow: 'hidden',
-        backdropFilter: 'blur(48px) saturate(180%) brightness(1.15)',
-        WebkitBackdropFilter: 'blur(48px) saturate(180%) brightness(1.15)',
-        background: 'rgba(220, 235, 255, 0.16)',
+        background: 'rgba(255,255,255,0.04)',
+        border: '1px solid rgba(255,255,255,0.1)',
         borderRadius: '28px',
         padding: '3.5rem',
         display: 'flex',
@@ -116,7 +117,7 @@ export default function Login({ onSwitchToSignup, onBack }) {
 
         {/* Header */}
         <div style={{ textAlign: 'center' }}>
-          <div style={{ color: '#fcd34d', fontSize: '0.6rem', letterSpacing: '0.45em', marginBottom: '1rem', textShadow: '0 0 6px #fbbf24, 0 0 18px rgba(251,191,36,0.5)' }}>
+          <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.6rem', letterSpacing: '0.45em', marginBottom: '1rem', textShadow: '0 0 6px #fff, 0 0 14px rgba(112,193,255,0.5)' }}>
             ACCÉDER AU SYSTÈME
           </div>
           <div style={{
@@ -139,7 +140,7 @@ export default function Login({ onSwitchToSignup, onBack }) {
         <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-            <label style={{ fontSize: '0.55rem', letterSpacing: '0.35em', color: '#4FC3F7', textShadow: '0 0 6px #4FC3F7, 0 0 18px rgba(79,195,247,0.5)' }}>EMAIL</label>
+            <label style={{ fontSize: '0.55rem', letterSpacing: '0.35em', color: 'rgba(255,255,255,0.85)', textShadow: '0 0 5px rgba(255,255,255,0.8), 0 0 12px rgba(112,193,255,0.4)' }}>EMAIL</label>
             <input
               type="email"
               placeholder="exemple@email.com"
@@ -153,7 +154,7 @@ export default function Login({ onSwitchToSignup, onBack }) {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-            <label style={{ fontSize: '0.55rem', letterSpacing: '0.35em', color: '#4FC3F7', textShadow: '0 0 6px #4FC3F7, 0 0 18px rgba(79,195,247,0.5)' }}>MOT DE PASSE</label>
+            <label style={{ fontSize: '0.55rem', letterSpacing: '0.35em', color: 'rgba(255,255,255,0.85)', textShadow: '0 0 5px rgba(255,255,255,0.8), 0 0 12px rgba(112,193,255,0.4)' }}>MOT DE PASSE</label>
             <input
               type="password"
               placeholder="••••••••"

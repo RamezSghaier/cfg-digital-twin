@@ -52,12 +52,14 @@ function RoleSelection({ onSelect, onBack }) {
 
   return (
     <div style={{
-      height: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontFamily: 'monospace',
-      pointerEvents: 'all',
+      position: 'fixed', top: 0, right: 0,
+      width: '50%', height: '100vh',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      fontFamily: 'monospace', pointerEvents: 'all',
+      background: 'linear-gradient(to left, rgba(4,9,26,0.85) 60%, rgba(4,9,26,0.3) 100%)',
+      backdropFilter: 'blur(6px)',
+      WebkitBackdropFilter: 'blur(6px)',
+      borderLeft: '1px solid rgba(255,255,255,0.06)',
     }}>
       <style>{SHARED_STYLES}</style>
 
@@ -66,7 +68,8 @@ function RoleSelection({ onSelect, onBack }) {
         overflow: 'hidden',
         backdropFilter: 'blur(48px) saturate(180%) brightness(1.15)',
         WebkitBackdropFilter: 'blur(48px) saturate(180%) brightness(1.15)',
-        background: 'rgba(220, 235, 255, 0.16)',
+        background: 'rgba(255,255,255,0.04)',
+        border: '1px solid rgba(255,255,255,0.1)',
         borderRadius: '28px',
         padding: '3.5rem',
         display: 'flex',
@@ -106,7 +109,7 @@ function RoleSelection({ onSelect, onBack }) {
 
         {/* Header */}
         <div style={{ textAlign: 'center' }}>
-          <div style={{ color: '#fcd34d', fontSize: '0.6rem', letterSpacing: '0.45em', marginBottom: '1rem', textShadow: '0 0 6px #fbbf24, 0 0 18px rgba(251,191,36,0.5)' }}>
+          <div style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.6rem', letterSpacing: '0.45em', marginBottom: '1rem', textShadow: '0 0 6px #fff, 0 0 14px rgba(112,193,255,0.5)' }}>
             CRÉER UN COMPTE
           </div>
           <div style={{
@@ -248,12 +251,14 @@ function SignupForm({ role, onSwitchToLogin, onBack }) {
 
   return (
     <div style={{
-      height: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontFamily: 'monospace',
-      pointerEvents: 'all',
+      position: 'fixed', top: 0, right: 0,
+      width: '50%', height: '100vh',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      fontFamily: 'monospace', pointerEvents: 'all',
+      background: 'linear-gradient(to left, rgba(4,9,26,0.85) 60%, rgba(4,9,26,0.3) 100%)',
+      backdropFilter: 'blur(6px)',
+      WebkitBackdropFilter: 'blur(6px)',
+      borderLeft: '1px solid rgba(255,255,255,0.06)',
     }}>
       <style>{SHARED_STYLES}</style>
 
@@ -263,7 +268,8 @@ function SignupForm({ role, onSwitchToLogin, onBack }) {
         overflow: 'hidden',
         backdropFilter: 'blur(48px) saturate(180%) brightness(1.15)',
         WebkitBackdropFilter: 'blur(48px) saturate(180%) brightness(1.15)',
-        background: 'rgba(220, 235, 255, 0.16)',
+        background: 'rgba(255,255,255,0.04)',
+        border: '1px solid rgba(255,255,255,0.1)',
         borderRadius: '28px',
         padding: '3.5rem',
         display: 'flex',
@@ -318,7 +324,7 @@ function SignupForm({ role, onSwitchToLogin, onBack }) {
             { name: 'confirm',  type: 'password', label: 'CONFIRMER MOT DE PASSE', placeholder: '••••••••',          value: confirm,     onChange: setConfirm,     required: true  },
           ].map(({ name, type, label, placeholder, value, onChange, required }) => (
             <div key={name} style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-              <label style={{ fontSize: '0.55rem', letterSpacing: '0.35em', color: '#4FC3F7', textShadow: '0 0 6px #4FC3F7, 0 0 18px rgba(79,195,247,0.5)' }}>{label}</label>
+              <label style={{ fontSize: '0.55rem', letterSpacing: '0.35em', color: 'rgba(255,255,255,0.85)', textShadow: '0 0 5px rgba(255,255,255,0.8), 0 0 12px rgba(112,193,255,0.4)' }}>{label}</label>
               <input
                 type={type}
                 placeholder={placeholder}
