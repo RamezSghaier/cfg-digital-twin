@@ -158,10 +158,11 @@ export default function LandingOverlay() {
               color: 'rgba(255,255,255,0.82)',
               margin: 0,
             }}>
-              Locomotive diesel-électrique surveillée en temps réel
-              via des capteurs IoT intégrés. Ce jumeau numérique
-              reflète son état exact, prédit les pannes et simule
-              les scénarios à risque avant qu'ils ne surviennent.
+              Locomotive diesel-électrique en service sur le réseau
+              SNCFT. Ce jumeau numérique évalue les conditions
+              météorologiques et l'état de l'infrastructure, prédit
+              les risques et simule des scénarios de danger grâce
+              à l'intelligence artificielle.
             </p>
 
           </div>

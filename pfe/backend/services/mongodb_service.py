@@ -114,6 +114,12 @@ async def delete_segment(db, segment_id: str) -> bool:
     return result.deleted_count > 0
 
 
+async def create_segment(db, segment: dict) -> dict:
+    segment["created_at"] = datetime.utcnow()
+    await db.courbures.insert_one(segment)
+    return _serialize(segment)
+
+
 # ─── Risk predictions ────────────────────────────────────────────────────────
 
 async def save_prediction(db, date: str, prediction: dict):

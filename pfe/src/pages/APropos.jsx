@@ -22,9 +22,9 @@ const TECH = [
 ]
 
 const TEAM = [
-  { role: 'Développeur',    name: 'Ramez Sghaier',        detail: 'Génie Informatique — ENIS Sfax', color: '#6366f1', init: 'RS' },
-  { role: 'Encadrant',      name: 'Encadrant académique', detail: 'École Nationale d\'Ingénieurs de Sfax', color: '#06b6d4', init: 'EA' },
-  { role: 'Co-encadrant',   name: 'Responsable CFG',      detail: 'Chemin de Fer de Gafsa',              color: '#10b981', init: 'RC' },
+  { role: 'Étudiant',             name: 'Ramez Sghaier',   detail: 'Génie Logiciel — Faculté des Sciences de Monastir',  color: '#6366f1', init: 'RS' },
+  { role: 'Encadrant universitaire', name: 'Mohsen Maraoui', detail: 'Génie Logiciel — Faculté des Sciences de Monastir', color: '#06b6d4', init: 'MM' },
+  { role: 'Encadrant entreprise', name: 'Nouha Hsen',      detail: 'Chemin de Fer de Gafsa',          color: '#10b981', init: 'NH' },
 ]
 
 const STATS = [

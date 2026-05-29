@@ -10,10 +10,22 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 
 from deps.auth import get_current_user, require_admin
-from services.mongodb_service import delete_segment, get_all_segments, update_segment
+from services.mongodb_service import create_segment, delete_segment, get_all_segments, update_segment
 from services.rail_risk import calculate_rail_risk_score
 
 router = APIRouter()
+
+
+class SegmentCreatePayload(BaseModel):
+    segment_id:     str
+    nom_ligne:      str
+    pk_debut:       float
+    pk_fin:         float
+    rayon_m:        float
+    developpement_m: float
+    devers_mm:      Optional[float] = None
+    gare_proche:    Optional[str]   = None
+    statut:         str             = "NORMAL"
 
 
 class SegmentUpdatePayload(BaseModel):
@@ -21,6 +33,21 @@ class SegmentUpdatePayload(BaseModel):
     devers_mm:   Optional[float] = None
     statut:      Optional[str]   = None   # "NORMAL" | "ALERTE"
     gare_proche: Optional[str]   = None
+
+
+@router.post("/segments")
+async def create_segment_route(
+    payload: SegmentCreatePayload,
+    request: Request,
+    _admin: dict = Depends(require_admin),
+):
+    """Create a new rail segment. Admin only."""
+    db = request.app.state.db
+    existing = await db.courbures.find_one({"segment_id": payload.segment_id})
+    if existing:
+        raise HTTPException(status_code=409, detail=f"Le segment '{payload.segment_id}' existe déjà.")
+    created = await create_segment(db, payload.model_dump())
+    return {"success": True, "segment": created}
 
 
 @router.get("/segments")

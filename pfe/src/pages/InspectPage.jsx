@@ -106,6 +106,130 @@ function SegmentCard({ seg, selected, onClick }) {
   )
 }
 
+/* ── Admin create modal ── */
+function CreateSegmentModal({ user, onSave, onClose }) {
+  const [form, setForm] = useState({
+    segment_id: '', nom_ligne: '', pk_debut: '', pk_fin: '',
+    rayon_m: '', developpement_m: '', devers_mm: '', gare_proche: '', statut: 'NORMAL',
+  })
+  const [saving, setSaving] = useState(false)
+  const [error,  setError]  = useState('')
+
+  async function handleCreate(e) {
+    e.preventDefault()
+    if (!form.segment_id || !form.nom_ligne || !form.rayon_m || !form.developpement_m) {
+      setError('Les champs ID, Ligne, Rayon et Développement sont obligatoires.')
+      return
+    }
+    setSaving(true)
+    setError('')
+    try {
+      const token = await user.getIdToken()
+      const body = {
+        segment_id:      form.segment_id.trim().toUpperCase(),
+        nom_ligne:       form.nom_ligne.trim(),
+        pk_debut:        parseFloat(form.pk_debut) || 0,
+        pk_fin:          parseFloat(form.pk_fin)   || 0,
+        rayon_m:         parseFloat(form.rayon_m),
+        developpement_m: parseFloat(form.developpement_m),
+        devers_mm:       form.devers_mm !== '' ? parseFloat(form.devers_mm) : null,
+        gare_proche:     form.gare_proche.trim() || null,
+        statut:          form.statut,
+      }
+      const res = await fetch(`${API_BASE}/segments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(body),
+      })
+      if (!res.ok) { const d = await res.json().catch(() => ({})); throw new Error(d.detail || `Erreur ${res.status}`) }
+      onSave()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const inp = {
+    width: '100%', padding: '8px 10px',
+    background: 'rgba(112,193,255,0.05)', border: '1px solid rgba(112,193,255,0.18)',
+    borderRadius: 8, color: '#d0e8ff', fontFamily: 'monospace', fontSize: '0.75rem',
+    outline: 'none', boxSizing: 'border-box',
+  }
+  const lbl = { fontSize: '0.52rem', letterSpacing: '0.28em', color: 'rgba(112,193,255,0.45)', marginBottom: 5, display: 'block' }
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
+
+  return (
+    <div onClick={e => { if (e.target === e.currentTarget) onClose() }} style={{
+      position: 'fixed', inset: 0, zIndex: 500,
+      background: 'rgba(0,0,0,0.65)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+    }}>
+      <div style={{ background: 'rgba(4,9,26,0.95)', backdropFilter: 'blur(24px)', border: '1px solid rgba(112,193,255,0.15)', borderRadius: 16, padding: 28, width: 400, fontFamily: 'monospace', maxHeight: '90vh', overflowY: 'auto' }}>
+        <div style={{ fontSize: '0.48rem', letterSpacing: '0.35em', color: 'rgba(112,193,255,0.38)', marginBottom: 4 }}>ADMINISTRATION</div>
+        <div style={{ fontSize: '0.9rem', color: '#e8f4ff', letterSpacing: '0.1em', marginBottom: 20 }}>NOUVEAU SEGMENT</div>
+        <form onSubmit={handleCreate} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <div>
+              <label style={lbl}>ID SEGMENT *</label>
+              <input placeholder="ex: B-07" value={form.segment_id} onChange={e => set('segment_id', e.target.value)} style={inp} />
+            </div>
+            <div>
+              <label style={lbl}>STATUT</label>
+              <select value={form.statut} onChange={e => set('statut', e.target.value)} style={inp}>
+                <option value="NORMAL">NORMAL</option>
+                <option value="ALERTE">ALERTE</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label style={lbl}>NOM DE LIGNE *</label>
+            <input placeholder="ex: Redeyef — M'dhilla" value={form.nom_ligne} onChange={e => set('nom_ligne', e.target.value)} style={inp} />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <div>
+              <label style={lbl}>PK DÉBUT (km)</label>
+              <input type="number" step="0.001" placeholder="0.000" value={form.pk_debut} onChange={e => set('pk_debut', e.target.value)} style={inp} />
+            </div>
+            <div>
+              <label style={lbl}>PK FIN (km)</label>
+              <input type="number" step="0.001" placeholder="0.000" value={form.pk_fin} onChange={e => set('pk_fin', e.target.value)} style={inp} />
+            </div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <div>
+              <label style={lbl}>RAYON COURBURE (m) *</label>
+              <input type="number" step="0.1" placeholder="310" value={form.rayon_m} onChange={e => set('rayon_m', e.target.value)} style={inp} />
+            </div>
+            <div>
+              <label style={lbl}>DÉVELOPPEMENT (m) *</label>
+              <input type="number" step="0.1" placeholder="450" value={form.developpement_m} onChange={e => set('developpement_m', e.target.value)} style={inp} />
+            </div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <div>
+              <label style={lbl}>DÉVERS (mm)</label>
+              <input type="number" step="0.1" value={form.devers_mm} onChange={e => set('devers_mm', e.target.value)} style={inp} />
+            </div>
+            <div>
+              <label style={lbl}>GARE PROCHE</label>
+              <input placeholder="ex: Redeyef" value={form.gare_proche} onChange={e => set('gare_proche', e.target.value)} style={inp} />
+            </div>
+          </div>
+          {error && <div style={{ fontSize: '0.65rem', color: '#f87171', padding: '7px 10px', background: 'rgba(248,113,113,0.08)', borderRadius: 7 }}>{error}</div>}
+          <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
+            <button type="submit" disabled={saving} style={{ flex: 1, padding: '9px', background: 'rgba(74,222,128,0.12)', border: '1px solid rgba(74,222,128,0.35)', borderRadius: 9, color: '#4ade80', fontFamily: 'monospace', fontSize: '0.62rem', letterSpacing: '0.18em', cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.5 : 1 }}>
+              {saving ? 'CRÉATION…' : 'CRÉER LE SEGMENT'}
+            </button>
+            <button type="button" onClick={onClose} style={{ padding: '9px 16px', background: 'none', border: '1px solid rgba(112,193,255,0.15)', borderRadius: 9, color: 'rgba(112,193,255,0.45)', fontFamily: 'monospace', fontSize: '0.62rem', cursor: 'pointer' }}>
+              ANNULER
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
 /* ── Admin edit modal ── */
 function EditSegmentModal({ seg, user, onSave, onClose }) {
   const [form,    setForm]    = useState({ rayon_m: seg.rayon_m ?? '', devers_mm: seg.devers_mm ?? '', statut: seg.statut || 'NORMAL' })
@@ -196,6 +320,7 @@ export default function InspectPage() {
   const [selected,       setSelected]       = useState(null)
   const [loading,        setLoading]        = useState(false)
   const [editTarget,     setEditTarget]     = useState(null)
+  const [createOpen,     setCreateOpen]     = useState(false)
   const [deleteConfirm,  setDeleteConfirm]  = useState(false)
   const [deleteError,    setDeleteError]    = useState('')
   const [deleting,       setDeleting]       = useState(false)
@@ -298,12 +423,30 @@ export default function InspectPage() {
           gap: 14,
         }}>
           {/* Header */}
-          <div style={{ padding: '0 0 0 4px' }}>
-            <div style={{ fontSize: '0.5rem', letterSpacing: '0.38em', color: 'rgba(112,193,255,0.4)', marginBottom: 4, fontFamily: 'monospace' }}>INFRASTRUCTURE</div>
-            <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800, color: '#e8f4ff', letterSpacing: '-0.01em' }}>
-              Segments de Rail
-            </h1>
-            <div style={{ width: 36, height: 3, background: 'linear-gradient(90deg,#70c1ff,#3a7bd5)', borderRadius: 2, marginTop: 10 }} />
+          <div style={{ padding: '0 0 0 4px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+            <div>
+              <div style={{ fontSize: '0.5rem', letterSpacing: '0.38em', color: 'rgba(112,193,255,0.4)', marginBottom: 4, fontFamily: 'monospace' }}>INFRASTRUCTURE</div>
+              <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800, color: '#e8f4ff', letterSpacing: '-0.01em' }}>
+                Segments de Rail
+              </h1>
+              <div style={{ width: 36, height: 3, background: 'linear-gradient(90deg,#70c1ff,#3a7bd5)', borderRadius: 2, marginTop: 10 }} />
+            </div>
+            {isAdmin && (
+              <button
+                onClick={() => setCreateOpen(true)}
+                style={{
+                  marginTop: 6, display: 'flex', alignItems: 'center', gap: 5,
+                  padding: '7px 14px', borderRadius: 9,
+                  background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.3)',
+                  color: '#4ade80', fontFamily: 'monospace', fontSize: '0.58rem',
+                  letterSpacing: '0.15em', cursor: 'pointer', transition: 'all 0.15s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(74,222,128,0.18)'; e.currentTarget.style.borderColor = 'rgba(74,222,128,0.5)' }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'rgba(74,222,128,0.1)';  e.currentTarget.style.borderColor = 'rgba(74,222,128,0.3)' }}
+              >
+                + NOUVEAU
+              </button>
+            )}
           </div>
 
           {/* Segment list */}
@@ -389,6 +532,15 @@ export default function InspectPage() {
               </div>
               <HealthBar pct={seg.health ?? 80} />
             </div>
+          )}
+
+          {/* Admin create modal */}
+          {createOpen && (
+            <CreateSegmentModal
+              user={user}
+              onSave={() => { setCreateOpen(false); fetchSegments() }}
+              onClose={() => setCreateOpen(false)}
+            />
           )}
 
           {/* Admin edit modal */}
